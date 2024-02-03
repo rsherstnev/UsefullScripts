@@ -5,16 +5,6 @@ red="\033[1;31m"
 yellow="\033[1;33m"
 default_color="\033[0m"
 
-if [ "$(groups | grep -o kesladmin)" != "kesladmin" ]; then
-   echo -e $red"Скрипт необходимо запускать от имени учетной записи, входящей в группу \"kesladmin\"!"$default_color
-   exit 1
-fi
-
-if [[ $(systemctl is-active kesl.service) == "inactive" ]]; then
-    echo -e $red"Служба Kaspersky Endpoint Security for Linux не запущена!"$default_color
-    exit 1
-fi
-
 function report_success {
     echo -e $green"[SUCCESS]$default_color Значение параметра \"$1\" задачи \"$2\" является допустимым в сертифицированной конфигурации."
 }
@@ -27,27 +17,36 @@ function report_warning {
     echo -e $yellow"[WARNING]$default_color $1"
 }
 
+if ! groups | grep -q kesladmin; then
+    report_fail "Скрипт необходимо запускать от имени учетной записи, входящей в группу \"kesladmin\"! Необходимо выполнить команду \"sudo gpasswd --add kesladmin $(whoami)\"."
+    exit 1
+fi
+
+if ! systemctl is-active kesl.service &> /dev/null; then
+    report_fail "Служба Kaspersky Endpoint Security for Linux не запущена! Необходимо выполнить команду \"sudo systemctl start kesl.service && sudo systemctl enable kesl.service\"."
+    exit 1
+fi
+
 function get_task_state {
     kesl-control --get-task-state $1 | grep Состояние | awk -F ':' '{ gsub(/ /, ""); print $2 }'
 }
 
 echo "Проверка статуса активации программы..."
-kesl-control -L --query &> /dev/null
-if [[ $? != 0 ]]; then
+if ! kesl-control -L --query &> /dev/null; then
     echo -e $red"[FAIL]$default_color Программа не активирована! Лицензионный ключ не добавлен"
 else
     echo -e $green"[SUCCESS]$default_color Программа активирована! Лицензионный ключ добавлен"
 fi
 
 echo "Проверка загруженности антивирусных баз..."
-if [[ $(kesl-control --app-info --json | grep "Базы программы загружены" | awk -F ':' '{ gsub(/ /, ""); print $2}' | tr -d "\"",",") == "Да" ]]; then
-    echo -e $green"[SUCCESS]$default_color Базы программы загружены!"
+if [[ $(kesl-control --app-info --json | grep "Базы программы загружены" | awk -F ':' '{ gsub(/ /, ""); print $2}' | tr -d "\"",",") == Да ]]; then
+    echo -e $green"[SUCCESS]$default_color Антивирусные базы программы загружены!"
 else
-    echo -e $red"[FAIL]$default_color Базы программы не загружены!"
+    echo -e $red"[FAIL]$default_color Антивирусные базы программы не загружены!"
 fi
 
 echo "Проверка статуса задачи \"Защита от файловых угроз\"..."
-if [[ $(get_task_state file_threat_protection) != "Запущена" ]]; then
+if [[ $(get_task_state file_threat_protection) != Запущена ]]; then
     echo -e $red"[FAIL]$default_color Задача \"Защита от файловых угроз\" не запущена!"
 else
     echo -e $green"[SUCCESS]$default_color Задача \"Защита от файловых угроз\" запущена!"
@@ -96,7 +95,7 @@ function is_parameter_value_secure_for_certified_config {
         ;;
         "SecondAction" )
             permissible_values=(Disinfect Remove Recommended)
-            if [[ $(kesl-control --get-settings $1 "FirstAction" | awk -F '=' '{print $2}') == "Remove" ]]; then
+            if [[ $(kesl-control --get-settings $1 "FirstAction" | awk -F '=' '{print $2}') == Remove ]]; then
                 return 0
             else
                 is_value_in_array $parameter_value permissible_values
@@ -149,138 +148,60 @@ function is_parameter_value_secure_for_certified_config {
     esac
 }
 
-echo 'Проверка значения параметра "FirstAction" задач Kaspersky Endpoint Security for Linux на соответствие сертифицированной конфигурации...'
-for task in file_threat_protection scan_my_computer scan_file critical_areas_scan container_scan custom_container_scan; do
-    is_parameter_value_secure_for_certified_config $task "FirstAction"
-    if [[ $? == 0 ]]; then
-        report_success FirstAction "${kesl_tasks_human_name[$task]}"
-    else
-        report_fail FirstAction "${kesl_tasks_human_name[$task]}"
-    fi
-done
-
-echo 'Проверка значения параметра "SecondAction" задач Kaspersky Endpoint Security for Linux на соответствие сертифицированной конфигурации...'
-for task in file_threat_protection scan_my_computer scan_file critical_areas_scan container_scan custom_container_scan; do
-    is_parameter_value_secure_for_certified_config $task "SecondAction"
-    if [[ $? == 0 ]]; then
-        report_success SecondAction "${kesl_tasks_human_name[$task]}"
-    else
-        report_fail SecondAction "${kesl_tasks_human_name[$task]}"
-    fi
-done
-
-echo 'Проверка значения параметра "UseAnalyzer" задач Kaspersky Endpoint Security for Linux на соответствие сертифицированной конфигурации...'
-for task in file_threat_protection scan_my_computer scan_file critical_areas_scan container_scan custom_container_scan; do
-    is_parameter_value_secure_for_certified_config $task "UseAnalyzer"
-    if [[ $? == 0 ]]; then
-        report_success UseAnalyzer "${kesl_tasks_human_name[$task]}"
-    else
-        report_fail UseAnalyzer "${kesl_tasks_human_name[$task]}"
-    fi
-done
-
-echo 'Проверка значения параметра "HeuristicLevel" задач Kaspersky Endpoint Security for Linux на соответствие сертифицированной конфигурации...'
-for task in file_threat_protection scan_my_computer scan_file critical_areas_scan container_scan custom_container_scan; do
-    is_parameter_value_secure_for_certified_config $task "HeuristicLevel"
-    if [[ $? == 0 ]]; then
-        report_success HeuristicLevel "${kesl_tasks_human_name[$task]}"
-    else
-        report_fail HeuristicLevel "${kesl_tasks_human_name[$task]}"
-    fi
-done
-
-echo 'Проверка значения параметра "ScanArchived" задач Kaspersky Endpoint Security for Linux на соответствие сертифицированной конфигурации...'
-for task in file_threat_protection scan_my_computer scan_file critical_areas_scan container_scan custom_container_scan; do
-    is_parameter_value_secure_for_certified_config $task "ScanArchived"
-    if [[ $? == 0 ]]; then
-        report_success ScanArchived "${kesl_tasks_human_name[$task]}"
-    else
-        report_fail ScanArchived "${kesl_tasks_human_name[$task]}"
-    fi
-done
-
-echo 'Проверка значения параметра "ScanSfxArchived" задач Kaspersky Endpoint Security for Linux на соответствие сертифицированной конфигурации...'
-for task in file_threat_protection scan_my_computer scan_file critical_areas_scan container_scan custom_container_scan; do
-    is_parameter_value_secure_for_certified_config $task "ScanSfxArchived"
-    if [[ $? == 0 ]]; then
-        report_success ScanSfxArchived "${kesl_tasks_human_name[$task]}"
-    else
-        report_fail ScanSfxArchived "${kesl_tasks_human_name[$task]}"
-    fi
-done
-
-echo 'Проверка значения параметра "ScanMailBases" задач Kaspersky Endpoint Security for Linux на соответствие сертифицированной конфигурации...'
-for task in file_threat_protection scan_my_computer scan_file critical_areas_scan container_scan custom_container_scan; do
-    is_parameter_value_secure_for_certified_config $task "ScanMailBases"
-    if [[ $? == 0 ]]; then
-        report_success ScanMailBases "${kesl_tasks_human_name[$task]}"
-    else
-        report_fail ScanMailBases "${kesl_tasks_human_name[$task]}"
-    fi
-done
-
-echo 'Проверка значения параметра "ScanByAccessType" задач Kaspersky Endpoint Security for Linux на соответствие сертифицированной конфигурации...'
-for task in file_threat_protection; do
-    is_parameter_value_secure_for_certified_config $task "ScanByAccessType"
-    if [[ $? == 0 ]]; then
-        report_success ScanByAccessType "${kesl_tasks_human_name[$task]}"
-    else
-        report_fail ScanByAccessType "${kesl_tasks_human_name[$task]}"
-    fi
-done
-
-echo 'Проверка значения параметра "SourceType" задач Kaspersky Endpoint Security for Linux на соответствие сертифицированной конфигурации...'
-for task in update; do
-    is_parameter_value_secure_for_certified_config $task "SourceType"
-    if [[ $? == 0 ]]; then
-        report_success SourceType "${kesl_tasks_human_name[$task]}"
-    else
-        report_fail SourceType "${kesl_tasks_human_name[$task]}"
-    fi
-done
-
-echo 'Проверка значения параметра "ApplicationUpdateMode" задач Kaspersky Endpoint Security for Linux на соответствие сертифицированной конфигурации...'
-for task in update; do
-    is_parameter_value_secure_for_certified_config $task "ApplicationUpdateMode"
-    if [[ $? == 0 ]]; then
-        report_success ApplicationUpdateMode "${kesl_tasks_human_name[$task]}"
-    else
-        report_fail ApplicationUpdateMode "${kesl_tasks_human_name[$task]}"
-    fi
-done
-
-echo 'Проверка значения параметра "UseHostBlocker" задач Kaspersky Endpoint Security for Linux на соответствие сертифицированной конфигурации...'
-for task in anti_cryptor; do
-    is_parameter_value_secure_for_certified_config $task "UseHostBlocker"
-    if [[ $? == 0 ]]; then
-        report_success UseHostBlocker "${kesl_tasks_human_name[$task]}"
-    else
-        report_fail UseHostBlocker "${kesl_tasks_human_name[$task]}"
-    fi
-done
-
-echo 'Проверка значения параметра "ActionOnDetect" задач Kaspersky Endpoint Security for Linux на соответствие сертифицированной конфигурации...'
-for task in web_threat_protection; do
-    is_parameter_value_secure_for_certified_config $task "ActionOnDetect"
-    if [[ $? == 0 ]]; then
-        report_success ActionOnDetect "${kesl_tasks_human_name[$task]}"
-    else
-        report_fail ActionOnDetect "${kesl_tasks_human_name[$task]}"
-    fi
-done
-
-echo 'Проверка значения параметра "ScanRemovableDrives" задач Kaspersky Endpoint Security for Linux на соответствие сертифицированной конфигурации...'
-for task in removable_drives_scan; do
-    is_parameter_value_secure_for_certified_config $task "ScanRemovableDrives"
-    if [[ $? == 0 ]]; then
-        report_success ScanRemovableDrives "${kesl_tasks_human_name[$task]}"
-    else
-        report_fail ScanRemovableDrives "${kesl_tasks_human_name[$task]}"
-    fi
+for parameter in FirstAction SecondAction UseAnalyzer HeuristicLevel ScanArchived ScanSfxArchived ScanMailBases ScanByAccessType SourceType ApplicationUpdateMode UseHostBlocker ActionOnDetect ScanRemovableDrives; do
+    case "$parameter" in
+        "FirstAction" )
+            tasks="file_threat_protection scan_my_computer scan_file critical_areas_scan container_scan custom_container_scan"
+        ;;
+        "SecondAction" )
+            tasks="file_threat_protection scan_my_computer scan_file critical_areas_scan container_scan custom_container_scan"
+        ;;
+        "UseAnalyzer" )
+            tasks="file_threat_protection scan_my_computer scan_file critical_areas_scan container_scan custom_container_scan"
+        ;;
+        "HeuristicLevel" )
+            tasks="file_threat_protection scan_my_computer scan_file critical_areas_scan container_scan custom_container_scan"
+        ;;
+        "ScanArchived " )
+            tasks="file_threat_protection scan_my_computer scan_file critical_areas_scan container_scan custom_container_scan"
+        ;;
+        "ScanSfxArchived" )
+            tasks="file_threat_protection scan_my_computer scan_file critical_areas_scan container_scan custom_container_scan"
+        ;;
+        "ScanMailBases" )
+            tasks="file_threat_protection scan_my_computer scan_file critical_areas_scan container_scan custom_container_scan"
+        ;;
+        "ScanByAccessType" )
+            tasks="file_threat_protection"
+        ;;
+        "SourceType" )
+            tasks="update"
+        ;;
+        "ApplicationUpdateMode" )
+            tasks="update"
+        ;;
+        "UseHostBlocker" )
+            tasks="anti_cryptor"
+        ;;
+        "ActionOnDetect" )
+            tasks="web_threat_protection"
+        ;;
+        "ScanRemovableDrives" )
+            tasks="removable_drives_scan"
+        ;;
+    esac
+    echo "Проверка значения параметра \"$parameter\" задач Kaspersky Endpoint Security for Linux на соответствие сертифицированной конфигурации..."
+    for task in $tasks; do
+        if is_parameter_value_secure_for_certified_config $task $parameter; then
+            report_success $parameter "${kesl_tasks_human_name[$task]}"
+        else
+            report_fail $parameter "${kesl_tasks_human_name[$task]}"
+        fi
+    done
 done
 
 echo 'Проверка значения общего параметра "UseKSN" программы Kaspersky Endpoint Security for Linux на соответствие сертифицированной конфигурации...'
-if [[ $(kesl-control --get-app-settings | grep UseKSN | awk -F '=' '{print $2}') == "No" ]]; then
+if [[ $(kesl-control --get-app-settings | grep UseKSN | awk -F '=' '{print $2}') == No ]]; then
     echo -e $green"[SUCCESS]$default_color Значение общего параметра "UseKSN" программы является допустимым в сертифицированной конфигурации."
 else
     echo -e $red"[FAIL]$default_color Значение общего параметра "UseKSN" программы НЕ является допустимым в сертифицированной конфигурации!"
@@ -288,14 +209,14 @@ fi
 
 echo -e $default_color
 read -p "Вы хотите произвести дополнительные проверки (не влияющие на состояние сертифицированности, но желательные для использования)? [Y/N]: " extra_checks
-if [[ $extra_checks == "Y" ]] || [[ $extra_checks == "y" ]]; then
+if [[ "$extra_checks" == Y || "$extra_checks" == y ]]; then
     echo "Проверка статуса задачи \"Проверка сьемных дисков\"..."
-    if [[ $(get_task_state removable_drives_scan) != "Запущена" ]]; then
+    if [[ $(get_task_state removable_drives_scan) != Запущена ]]; then
         report_warning "Задача \"Проверка сьемных дисков\" не запущена!"
     else
         echo -e $green"[SUCCESS]$default_color Задача \"Проверка сьемных дисков\" запущена!"
         echo "Проверка значения параметра \"ScanOpticalDrives\" задачи \"Проверка сьемных дисков\"..."
-        if [[ $(kesl-control --get-settings removable_drives_scan ScanOpticalDrives | awk -F '=' '{print $2}') != "DetailedScan" ]]; then
+        if [[ $(kesl-control --get-settings removable_drives_scan ScanOpticalDrives | awk -F '=' '{print $2}') != DetailedScan ]]; then
             report_warning "Значение параметра \"ScanOpticalDrives\" задачи \"Проверка сьемных дисков\" настроено не оптимально. Лучше задать его как \"DetailedScan\"."
         else
             echo -e $green"[SUCCESS]$default_color Значение параметра \"ScanOpticalDrives\" задачи \"Проверка сьемных дисков\" настроено оптимально"
@@ -310,8 +231,10 @@ if [[ $extra_checks == "Y" ]] || [[ $extra_checks == "y" ]]; then
         echo -e $green"[SUCCESS]$default_color Антивирусные базы актуальны!"
     fi
     echo "Проверка расписания задачи \"Антивирусная проверка\"..."
-    if [[ $(kesl-control --get-schedule scan_my_computer | awk -F '=' '{print $2}') == "Manual" ]]; then
+    if [[ $(kesl-control --get-schedule scan_my_computer | awk -F '=' '{print $2}') == Manual ]]; then
         report_warning "Задача \"Антивирусная проверка\" настроена на ручной запуск, что не является лучшей практикой! Желательно переделать на автозапуск раз в определенный период времени."
+    else
+        echo -e $green"[SUCCESS]$default_color Задача \"Антивирусная проверка\" запускается автоматически!"
     fi
 else
     exit 0
