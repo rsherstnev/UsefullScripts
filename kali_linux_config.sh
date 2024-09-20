@@ -5,7 +5,7 @@ _GREEN_COLOR="\e[1;32m"
 _YELLOW_COLOR="\e[1;33m"
 _COLOR_RESET="\e[0m"
 
-if [[ "$(id -u)" != 0 ]]; then
+if [[ $EUID != 0 ]]; then
     echo -e "${_RED_COLOR}!!! Данный скрипт должен быть запущен от имени root !!!${_COLOR_RESET}"
     exit 1
 fi
@@ -15,11 +15,11 @@ function report_step {
 }
 
 function report_success {
-    echo -e "   ${_GREEN_COLOR}[SUCCESS] $1.${_COLOR_RESET}"
+    echo -e "  ${_GREEN_COLOR}[SUCCESS] $1.${_COLOR_RESET}"
 }
 
 function report_fail {
-    echo -e "   ${_RED_COLOR}[FAIL] $1!${_COLOR_RESET}"
+    echo -e "  ${_RED_COLOR}[FAIL] $1!${_COLOR_RESET}"
 }
 
 function file_download {
@@ -42,6 +42,10 @@ function git_clone {
     else
         report_fail "При клонировании репозитория \"$1\" в директорию $2 произошла ошибка"
     fi
+}
+
+function to_lower {
+    echo $1 | awk '{print tolower($0)}'
 }
 
 function set_command_hotkey {
@@ -68,6 +72,14 @@ function set_xfce4_setting {
     fi
 }
 
+function set_custom_setting {
+    if xfconf-query -c $1 -p "$2" -t string -s "$3" &> /dev/null || xfconf-query -c $1 -n -p "$2" -t string -s "$3" &> /dev/null; then
+        report_success "В канале \"$1\" настройка \"$2\" была успешно выставлена в значение \"$3\""
+    else
+        report_fail "При выставлении в канале \"$1\" настройки \"$2\" в значение \"$3\" произошла ошибка"
+    fi
+}
+
 function pipx_install {
     if pipx install $1 &> /dev/null; then
         report_success "Утилита \"$1\" была успешно установлена"
@@ -84,32 +96,34 @@ function pipx_github_install {
     fi
 }
 
+function create_symlink {
+    if ln -s $1 $2 &> /dev/null; then
+        report_success "Cимлинк на \"$1\" был успешно создан в \"$2\""
+    else
+        report_fail "При создании симлинка на \"$1\" в \"$2\" произошла ошибка"
+    fi
+}
+
+function make_pipenv_to_system {
+    PYTHON_PIPENV_TOOL_PATH=$1
+    PYTHON_PIPENV_DIR=$(dirname $1)
+    PYTHON_PIPENV_TOOL=$(basename $PYTHON_PIPENV_TOOL_PATH | cut -d . -f 1)
+    cd $PYTHON_PIPENV_DIR
+    pipenv install &> /dev/null
+    PYTHON_PIPENV_VENV_DIR=$(env PWD=$PYTHON_PIPENV_DIR pipenv --venv)
+    sed -i '1d' $PYTHON_PIPENV_TOOL_PATH
+    SHEBANG="#!$PYTHON_PIPENV_VENV_DIR/bin/python"
+    sed -i "1i ${SHEBANG}" $PYTHON_PIPENV_TOOL_PATH
+    create_symlink $PYTHON_PIPENV_TOOL_PATH $HOME/.local/bin/$(to_lower $PYTHON_PIPENV_TOOL)
+    cd
+    chmod +x $PYTHON_PIPENV_TOOL_PATH
+}
+
 report_step "Разблокировка пользователя root, задайте ему пароль"
 if passwd; then
     report_success "Пользователь root был успешно разблокирован"
 else
     report_fail "При разблокировке пользователя root произошла ошибка"
-fi
-
-report_step "Установка русского языка в систему"
-if sed '/ru_RU.UTF-8 UTF-8/s/^# //' -i /etc/locale.gen && locale-gen &> /dev/null && localectl set-locale LANG=ru_RU.UTF-8; then
-    report_success "Русский язык был успешно установлен в систему"
-else
-    report_fail "При установке русского языка в систему произошла ошибка"
-fi
-
-report_step "Обновление системы"
-if apt update &> /dev/null && apt dist-upgrade -y &> /dev/null; then
-    report_success "Система была успешно обновлена"
-else
-    report_fail "При обновлении системы произошла ошибка"
-fi
-
-report_step "Задание необходимой временной зоны"
-if timedatectl set-timezone Asia/Krasnoyarsk &> /dev/null; then
-    report_success "Временная зона \"Красноярск\" была успешно задана"
-else
-    report_fail "При установке временной зоны \"Красноярск\" произошла ошибка"
 fi
 
 report_step "Создание необходимых директорий"
@@ -122,7 +136,7 @@ for directory in \
     $HOME/.local/share/mc/skins \
     $HOME/.local/share/xfce4/terminal/colorschemes \
     $HOME/.zsh-custom-completions \
-    /opt/{docker-software/{c2,},docker-volumes,pipenv-software,exploits,htb,post/{docker,linux,windows,general},scripts,shells,software/{reverse,c2,},custom_passwords};
+    /opt/{docker-software/{c2,},docker-volumes,pipenv-software,python-venvs,exploits,htb,post/{docker,linux,windows,general},scripts,shells,software/{reverse,c2,},custom_passwords};
 do
     if [[ ! -d $directory ]]; then
         if mkdir -p $directory &> /dev/null; then
@@ -132,6 +146,47 @@ do
         fi
     fi
 done
+
+report_step "Установка русского языка в систему"
+if sed '/ru_RU.UTF-8 UTF-8/s/^# //' -i /etc/locale.gen && locale-gen &> /dev/null; then
+    report_success "Русский язык был успешно установлен в систему"
+else
+    report_fail "При установке русского языка в систему произошла ошибка"
+fi
+
+report_step "Изменение наименований стандартных директорий хомяка на кастомные"
+if sed -Ei 's/DESKTOP=.*/DESKTOP=desktop/g' /etc/xdg/user-dirs.defaults &&
+    sed -Ei 's/DOWNLOAD=.*/DOWNLOAD=downloads/g' /etc/xdg/user-dirs.defaults &&
+    sed -Ei 's/TEMPLATES=.*/TEMPLATES=templates/g' /etc/xdg/user-dirs.defaults &&
+    sed -Ei 's/PUBLICSHARE=.*/PUBLICSHARE=public/g' /etc/xdg/user-dirs.defaults &&
+    sed -Ei 's/DOCUMENTS=.*/DOCUMENTS=documents/g' /etc/xdg/user-dirs.defaults &&
+    sed -Ei 's/MUSIC=.*/MUSIC=music/g' /etc/xdg/user-dirs.defaults &&
+    sed -Ei 's/PICTURES=.*/PICTURES=pictures/g' /etc/xdg/user-dirs.defaults &&
+    sed -Ei 's/VIDEOS=.*/VIDEOS=videos/g' /etc/xdg/user-dirs.defaults &&
+    echo en_US > $HOME/.config/user-dirs.locale; then
+    report_success "Наименования стандартных директорий хомяка были успешно изменены на кастомные"
+else
+    report_fail "При изменении наименований стандартных директорий хомяка на кастомные произошла ошибка"
+fi
+
+report_step "Обновление системы"
+export DEBIAN_FRONTEND=noninteractive
+if apt update &> /dev/null && apt full-upgrade -y &> /dev/null; then
+    report_success "Система была успешно обновлена"
+else
+    report_fail "При обновлении системы произошла ошибка"
+fi
+
+report_step "Задание необходимой временной зоны"
+if timedatectl set-timezone Asia/Krasnoyarsk &> /dev/null; then
+    report_success "Временная зона \"Красноярск\" была успешно задана"
+else
+    report_fail "При установке временной зоны \"Красноярск\" произошла ошибка"
+fi
+
+report_step "Создание необходимых симлинков"
+create_symlink $HOME/.local/share/pipx/venvs /opt/python-venvs/pipx-venvs
+create_symlink $HOME/.local/share/virtualenvs /opt/python-venvs/pipenv-venvs
 
 report_step "Установка необходимого для работы софта"
 for software in \
@@ -355,7 +410,7 @@ file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/g
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/xfce4-terminal/terminalrc $HOME/.config/xfce4/terminal/terminalrc
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/btop/btop.conf $HOME/.config/btop/btop.conf
 # Установка тем
-file_download https://raw.githubusercontent.com/dracula/xfce4-terminal/256ed4240a5b6f4bcb403da7bfe34274e10b5fec/Dracula.theme $HOME/.local/share/xfce4/terminal/colorschemes/Dracula.theme
+file_download https://raw.githubusercontent.com/dracula/xfce4-terminal/master/Dracula.theme $HOME/.local/share/xfce4/terminal/colorschemes/Dracula.theme
 # Установка личных скриптов
 file_download https://raw.githubusercontent.com/rsherstnev/CTF/master/Scripts/searchnmapscript.py /opt/scripts/searchnmapscript.py
 file_download https://raw.githubusercontent.com/rsherstnev/CTF/master/Scripts/revshellgen.py /opt/scripts/revshellgen.py
@@ -478,6 +533,7 @@ git_clone https://github.com/pwndbg/pwndbg /opt/software/reverse/pwndbg/
 git_clone https://github.com/hugsy/gef /opt/software/reverse/gef
 git_clone https://github.com/cyrus-and/gdb-dashboard /opt/software/reverse/gdb-dashboard
 git_clone https://github.com/ropnop/windapsearch /opt/pipenv-software/windapsearch
+git_clone https://github.com/t3l3machus/Villain /opt/pipenv-software/villain
 git_clone https://github.com/zsh-users/zsh-syntax-highlighting $HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
 git_clone https://github.com/zsh-users/zsh-autosuggestions $HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions
 git_clone https://github.com/Aloxaf/fzf-tab $HOME/.oh-my-zsh/custom/plugins/fzf-tab
@@ -545,6 +601,11 @@ set_xfce4_setting org.gnome.desktop.interface gtk-theme 'Mc-OS-CTLina-XFCE-Dark'
 set_xfce4_setting org.gnome.desktop.interface icon-theme 'Flat-Remix-Teal-Dark'
 set_xfce4_setting org.gnome.desktop.interface cursor-theme 'Breeze_Default'
 set_xfce4_setting org.gnome.desktop.wm.preferences num-workspaces 4
+set_custom_setting xfce4-power-manager /xfce4-power-manager/dpms-on-ac-off 0
+set_custom_setting xfce4-desktop /desktop-icons/file-icons/show-filesystem false
+set_custom_setting xfce4-desktop /desktop-icons/file-icons/show-home false
+set_custom_setting xfce4-desktop /desktop-icons/file-icons/show-removable true
+set_custom_setting xfce4-desktop /desktop-icons/file-icons/show-trash false
 
 report_step "Генерация и скачивание необходимых файлов zsh completions"
 if gobuster completion zsh > $HOME/.zsh-custom-completions/_gobuster; then
@@ -553,3 +614,16 @@ else
     report_fail "При генерации файла с дополнениями для утилиты \"gobuster\" по адресу \"$HOME/.zsh-custom-completions/_gobuster\" произошла ошибка"
 fi
 file_download https://raw.githubusercontent.com/docker/cli/master/contrib/completion/zsh/_docker $HOME/.zsh-custom-completions/_docker
+file_download https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/plugins/pip/_pip $HOME/.zsh-custom-completions/_pip
+
+report_step "Установка необходимых python утилит в виртуальные окружения"
+for tool_path in \
+    /opt/pipenv-software/windapsearch/windapsearch.py \
+    /opt/pipenv-software/villain/Villain.py;
+do
+    if make_pipenv_to_system $tool_path; then
+        report_success "Python утилита по адресу $tool_path успешно установлена в виртуальное окружение"
+    else
+        report_fail "При установке python утилиты по адресу $tool_path в виртуальное окружение произошла ошибка"
+    fi
+done
