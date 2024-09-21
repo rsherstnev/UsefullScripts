@@ -135,8 +135,10 @@ for directory in \
     $HOME/.config/nvim \
     $HOME/.local/share/mc/skins \
     $HOME/.local/share/xfce4/terminal/colorschemes \
+    $HOME/.local/share/{themes,icons} \
     $HOME/.zsh-custom-completions \
-    /opt/{docker-software/{c2,},docker-volumes,pipenv-software,python-venvs,exploits,htb,post/{docker,linux,windows,general},scripts,shells,software/{reverse,c2,},custom_passwords};
+    /opt/{docker-software/{c2,},docker-volumes,pipenv-software,python-venvs,exploits,htb,post/{docker,linux,windows,general},scripts,shells,software/{reverse,c2,},custom_passwords} \
+    /pictures;
 do
     if [[ ! -d $directory ]]; then
         if mkdir -p $directory &> /dev/null; then
@@ -363,7 +365,6 @@ for python_repo in \
     "ShawnDEvans/smbmap" \
     "calebstewart/pwncat" \
     "cddmp/enum4linux-ng" \
-    "nvbn/thefuck" \
     "httpie/http-prompt" \
     "dbcli/mycli" \
     "dbcli/pgcli" \
@@ -407,7 +408,7 @@ file_download https://raw.githubusercontent.com/dracula/midnight-commander/maste
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/mc/ini $HOME/.config/mc/ini
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/mc/panels.ini $HOME/.config/mc/panels.ini
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/git/.gitconfig $HOME/.gitconfig
-file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/xfce4-terminal/terminalrc $HOME/.config/xfce4/terminal/terminalrc
+file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/refs/heads/master/xfce4/xfce4-terminal/xfce4-terminal.xml $HOME/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-terminal.xml
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/btop/btop.conf $HOME/.config/btop/btop.conf
 # Установка тем
 file_download https://raw.githubusercontent.com/dracula/xfce4-terminal/master/Dracula.theme $HOME/.local/share/xfce4/terminal/colorschemes/Dracula.theme
@@ -416,6 +417,13 @@ file_download https://raw.githubusercontent.com/rsherstnev/CTF/master/Scripts/se
 file_download https://raw.githubusercontent.com/rsherstnev/CTF/master/Scripts/revshellgen.py /opt/scripts/revshellgen.py
 file_download https://raw.githubusercontent.com/rsherstnev/CTF/master/Scripts/base64enpacker.py /opt/scripts/base64enpacker.py
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/tmux/vpn_ip.sh /opt/scripts/vpn_ip.sh
+
+report_step "Установка прогарммы \"vim-plug\" для управления плагинами Vim"
+if curl -fLo $HOME/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim; then
+    report_success "Прогармма \"vim-plug\" для управления плагинами Vim была установлена успешно"
+else
+    report_fail "При установке прогарммы \"vim-plug\" для управления плагинами Vim произошла ошибка"
+fi
 
 report_step "Копирование настроек vim в neovim"
 if ln -s $HOME/.vimrc $HOME/.config/nvim/init.vim &> /dev/null; then
@@ -597,7 +605,6 @@ set_command_hotkey "Print" "xfce4-screenshooter"
 set_command_hotkey "<Ctrl><Shift>Escape" "xfce4-taskmanager"
 
 report_step "Задание необходимых настроек XFCE4 окружения"
-set_xfce4_setting org.gnome.desktop.interface gtk-theme 'Mc-OS-CTLina-XFCE-Dark'
 set_xfce4_setting org.gnome.desktop.interface icon-theme 'Flat-Remix-Teal-Dark'
 set_xfce4_setting org.gnome.desktop.interface cursor-theme 'Breeze_Default'
 set_xfce4_setting org.gnome.desktop.wm.preferences num-workspaces 4
