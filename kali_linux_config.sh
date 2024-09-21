@@ -48,38 +48,6 @@ function to_lower {
     echo $1 | awk '{print tolower($0)}'
 }
 
-function set_command_hotkey {
-    if xfconf-query -c xfce4-keyboard-shortcuts -p "/commands/custom/$1" -t string -s "$2" &> /dev/null || xfconf-query -c xfce4-keyboard-shortcuts -n -p "/commands/custom/$1" -t string -s "$2" &> /dev/null; then
-        report_success "Горячая клавиша \"$1\" для действия \"$2\" была успешно назначена"
-    else
-        report_fail "При назначении горячей клавиши \"$1\" для действия \"$2\" произошла ошибка"
-    fi
-}
-
-function set_xfwm4_hotkey {
-    if xfconf-query -c xfce4-keyboard-shortcuts -p "/xfwm4/custom/$1" -t string -s "$2" &> /dev/null || xfconf-query -c xfce4-keyboard-shortcuts -n -p "/xfwm4/custom/$1" -t string -s "$2" &> /dev/null; then
-        report_success "Горячая клавиша \"$1\" для действия \"$2\" была успешно назначена"
-    else
-        report_fail "При назначении горячей клавиши \"$1\" для действия \"$2\" произошла ошибка"
-    fi
-}
-
-function set_xfce4_setting {
-    if gsettings set $1 $2 "$3" &> /dev/null; then
-        report_success "Для схемы \"$1\" ключ \"$2\" со значением \"$3\" был успешно задан"
-    else
-        report_fail "При задании для схемы \"$1\" ключа \"$2\" со значением \"$3\" произошла ошибка"
-    fi
-}
-
-function set_custom_setting {
-    if xfconf-query -c $1 -p "$2" -t string -s "$3" &> /dev/null || xfconf-query -c $1 -n -p "$2" -t string -s "$3" &> /dev/null; then
-        report_success "В канале \"$1\" настройка \"$2\" была успешно выставлена в значение \"$3\""
-    else
-        report_fail "При выставлении в канале \"$1\" настройки \"$2\" в значение \"$3\" произошла ошибка"
-    fi
-}
-
 function pipx_install {
     if pipx install $1 &> /dev/null; then
         report_success "Утилита \"$1\" была успешно установлена"
@@ -281,6 +249,7 @@ fi
 report_step "Установка необходимого для тестирования на проникновение софта"
 for software in \
     nmap \
+    ncat \
     sqlmap \
     burpsuite \
     exploitdb \
@@ -554,66 +523,6 @@ else
     report_fail "При установке pyenv произошла ошибка"
 fi
 
-report_step "Задание горячих клавиш XFCE4 окружения"
-set_xfwm4_hotkey "<Alt>F4" "close_window_key"
-set_xfwm4_hotkey "<Super>d" "show_desktop_key"
-set_xfwm4_hotkey "<Alt>Tab" "cycle_windows_key"
-set_xfwm4_hotkey "<Shift><Alt>Tab" "cycle_reverse_windows_key"
-set_xfwm4_hotkey "<Super>Tab" "switch_window_key"
-set_xfwm4_hotkey "<Super>Up" "tile_up_key"
-set_xfwm4_hotkey "<Super>KP_Home" "tile_up_left_key"
-set_xfwm4_hotkey "<Super>Left" "tile_left_key"
-set_xfwm4_hotkey "<Super>KP_End" "tile_down_left_key"
-set_xfwm4_hotkey "<Super>Down" "tile_down_key"
-set_xfwm4_hotkey "<Super>KP_Page_Down" "tile_down_right_key"
-set_xfwm4_hotkey "<Super>Right" "tile_right_key"
-set_xfwm4_hotkey "<Super>KP_Page_Up" "tile_up_right_key"
-set_xfwm4_hotkey "<Control><Super>Left" "left_workspace_key"
-set_xfwm4_hotkey "<Control><Super>Right" "right_workspace_key"
-set_xfwm4_hotkey "<Control><Super>1" "workspace_1_key"
-set_xfwm4_hotkey "<Control><Super>2" "workspace_2_key"
-set_xfwm4_hotkey "<Control><Super>3" "workspace_3_key"
-set_xfwm4_hotkey "<Control><Super>4" "workspace_4_key"
-set_xfwm4_hotkey "<Control><Super>5" "workspace_5_key"
-set_xfwm4_hotkey "<Control><Super>6" "workspace_6_key"
-set_xfwm4_hotkey "<Control><Super>7" "workspace_7_key"
-set_xfwm4_hotkey "<Control><Super>8" "workspace_8_key"
-set_xfwm4_hotkey "<Control><Super>9" "workspace_9_key"
-set_xfwm4_hotkey "<Control><Super><Shift>Left" "move_window_left_workspace_key"
-set_xfwm4_hotkey "<Control><Super><Shift>Right" "move_window_right_workspace_key"
-set_xfwm4_hotkey "<Control><Super><Shift>1" "move_window_workspace_1_key"
-set_xfwm4_hotkey "<Control><Super><Shift>2" "move_window_workspace_2_key"
-set_xfwm4_hotkey "<Control><Super><Shift>3" "move_window_workspace_3_key"
-set_xfwm4_hotkey "<Control><Super><Shift>4" "move_window_workspace_4_key"
-set_xfwm4_hotkey "<Control><Super><Shift>5" "move_window_workspace_5_key"
-set_xfwm4_hotkey "<Control><Super><Shift>6" "move_window_workspace_6_key"
-set_xfwm4_hotkey "<Control><Super><Shift>7" "move_window_workspace_7_key"
-set_xfwm4_hotkey "<Control><Super><Shift>8" "move_window_workspace_8_key"
-set_xfwm4_hotkey "<Control><Super><Shift>9" "move_window_workspace_9_key"
-set_command_hotkey "<Alt>F1" "xfce4-popup-whiskermenu"
-set_command_hotkey "<Alt>F2" "rofi -show run -font \"monaco 12\" -lines 20 -hide-scrollbar -scroll-method 1 -width 40 -icon-theme \"Papirus\" -show-icons"
-set_command_hotkey "<Alt>F3" "xfce4-appfinder"
-set_command_hotkey "<Alt>Print" "xfce4-screenshooter -w"
-set_command_hotkey "<Ctrl><Alt>Delete" "xfce4-session-logout"
-set_command_hotkey "<Shift>Print" "xfce4-screenshooter -r"
-set_command_hotkey "<Super>e" "exo-open --launch FileManager"
-set_command_hotkey "<Super>l" "xflock4"
-set_command_hotkey "<Super>r" "xfce4-appfinder -c"
-set_command_hotkey "<Super>Return" "xfce4-terminal --drop-down"
-set_command_hotkey "<Ctrl><Alt>t" "exo-open --launch TerminalEmulator"
-set_command_hotkey "Print" "xfce4-screenshooter"
-set_command_hotkey "<Ctrl><Shift>Escape" "xfce4-taskmanager"
-
-report_step "Задание необходимых настроек XFCE4 окружения"
-set_xfce4_setting org.gnome.desktop.interface icon-theme 'Flat-Remix-Teal-Dark'
-set_xfce4_setting org.gnome.desktop.interface cursor-theme 'Breeze_Default'
-set_xfce4_setting org.gnome.desktop.wm.preferences num-workspaces 4
-set_custom_setting xfce4-power-manager /xfce4-power-manager/dpms-on-ac-off 0
-set_custom_setting xfce4-desktop /desktop-icons/file-icons/show-filesystem false
-set_custom_setting xfce4-desktop /desktop-icons/file-icons/show-home false
-set_custom_setting xfce4-desktop /desktop-icons/file-icons/show-removable true
-set_custom_setting xfce4-desktop /desktop-icons/file-icons/show-trash false
-
 report_step "Генерация и скачивание необходимых файлов zsh completions"
 if gobuster completion zsh > $HOME/.zsh-custom-completions/_gobuster; then
     report_success "Файл с дополнениями для утилиты \"gobuster\" был успешно сгенерирован по адресу \"$HOME/.zsh-custom-completions/_gobuster\""
@@ -634,3 +543,7 @@ do
         report_fail "При установке python утилиты по адресу $tool_path в виртуальное окружение произошла ошибка"
     fi
 done
+
+report_step "Создание необходимых симлинков"
+create_symlink /opt/post/general/peass-ng/linPEAS /opt/post/linux/linPEAS
+create_symlink /opt/post/general/peass-ng/winPEAS /opt/post/windows/winPEAS
