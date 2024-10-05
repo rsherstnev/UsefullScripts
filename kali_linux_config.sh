@@ -105,7 +105,7 @@ for directory in \
     $HOME/.local/share/xfce4/terminal/colorschemes \
     $HOME/.local/share/{themes,icons} \
     $HOME/.zsh-custom-completions \
-    /opt/{docker-software/{c2,},docker-volumes,pipenv-software,python-venvs,exploits,htb,post/{docker,linux,windows,general},scripts,shells,software/{reverse,c2,},custom_passwords} \
+    /opt/{docker-software/{c2,},docker-volumes,pipenv-software,python-venvs,exploits,htb,post/{docker,linux,windows,general},scripts,shells,software/{reverse,c2,bin,},custom_passwords} \
     /pictures;
 do
     if [[ ! -d $directory ]]; then
@@ -178,11 +178,14 @@ for software in \
     tailspin \
     openvpn \
     wireguard \
+    resolvconf \
+    iptables \
     tree \
     mc \
     rlwrap \
     tcpdump \
     tshark \
+    termshark \
     wireshark \
     man-db \
     mousepad \
@@ -191,6 +194,7 @@ for software in \
     mawk \
     sed \
     ncdu \
+    du-dust \
     pv \
     colordiff \
     gpg \
@@ -297,6 +301,13 @@ for software in \
     feroxbuster \
     patator \
     wfuzz \
+    ligolo-ng \
+    macchanger \
+    arping \
+    snmp \
+    onesixtyone \
+    jxplorer \
+    nbtscan \
     weevely;
 do
     if apt install -y $software &> /dev/null; then
@@ -332,7 +343,9 @@ for python_repo in \
     "httpie/cli" \
     "sc0tfree/updog" \
     "ShawnDEvans/smbmap" \
+    "p0dalirius/smbclient-ng" \
     "calebstewart/pwncat" \
+    "brightio/penelope" \
     "cddmp/enum4linux-ng" \
     "httpie/http-prompt" \
     "dbcli/mycli" \
@@ -342,6 +355,9 @@ for python_repo in \
     "s0md3v/Arjun" \
     "EnableSecurity/wafw00f" \
     "dirkjanm/BloodHound.py" \
+    "darkoperator/dnsrecon" \
+    "dirkjanm/adidnsdump" \
+    "laramies/theHarvester" \
     "elceef/dnstwist";
 do
     if pipx_github_install $python_repo &> /dev/null; then
@@ -365,11 +381,11 @@ done
 report_step "Установка необходимых конфигов, скриптов, тем"
 # Установка личных конфигов
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/bash/.bashrc $HOME/.bashrc
-file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/bash/.bash_aliases $HOME/.bash_aliases
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/bash/.inputrc $HOME/.inputrc
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/zsh/.zshrc $HOME/.zshrc
-file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/zsh/.zsh_aliases $HOME/.zsh_aliases
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/zsh/.zprofile $HOME/.zprofile
+file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/refs/heads/master/bash_and_zsh/.aliases $HOME/.aliases
+file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/refs/heads/master/bash_and_zsh/.functions $HOME/.functions
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/vim/.vimrc $HOME/.vimrc
 file_download https://raw.githubusercontent.com/cocopon/iceberg.vim/master/colors/iceberg.vim $HOME/.vim/colors/iceberg.vim
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/tmux/.tmux.conf $HOME/.tmux.conf
@@ -380,6 +396,7 @@ file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/g
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/btop/btop.conf $HOME/.config/btop/btop.conf
 # Установка тем
 file_download https://raw.githubusercontent.com/dracula/xfce4-terminal/master/Dracula.theme $HOME/.local/share/xfce4/terminal/colorschemes/Dracula.theme
+file_download https://raw.githubusercontent.com/dracula/qterminal/refs/heads/main/Dracula.colorscheme /usr/share/qtermwidget5/color-schemes/Dracula.colorscheme
 # Установка личных скриптов
 file_download https://raw.githubusercontent.com/rsherstnev/CTF/master/Scripts/searchnmapscript.py /opt/scripts/searchnmapscript.py
 file_download https://raw.githubusercontent.com/rsherstnev/CTF/master/Scripts/revshellgen.py /opt/scripts/revshellgen.py
@@ -515,8 +532,7 @@ git_clone https://github.com/zsh-users/zsh-autosuggestions $HOME/.oh-my-zsh/cust
 git_clone https://github.com/Aloxaf/fzf-tab $HOME/.oh-my-zsh/custom/plugins/fzf-tab
 
 report_step "Установка pyenv"
-file_download https://pyenv.run /tmp/pyenv.run
-if bash /tmp/pyenv.run &> /dev/null; then
+if curl -L https://raw.githubusercontent.com/yyuu/pyenv-installer/master/bin/pyenv-installer | bash &> /dev/null; then
     report_success "Pyenv был успешно установлен"
 else
     report_fail "При установке pyenv произошла ошибка"
@@ -546,3 +562,5 @@ done
 report_step "Создание необходимых симлинков"
 create_symlink /opt/post/general/peass-ng/linPEAS /opt/post/linux/linPEAS
 create_symlink /opt/post/general/peass-ng/winPEAS /opt/post/windows/winPEAS
+
+# Скачать godap, delta, go-windapsearch, kerbrute
