@@ -17,7 +17,10 @@ function report_fail {
     echo -e "  ${_RED_COLOR}[FAIL] $1!${_COLOR_RESET}"
 }
 
-for user in secadmin sysadmin user{1..27}; do
+# Если необходимо поменять пароль только определенным пользователям, то нужно заменить цикл, например, на:
+# for user in secadmin sysadmin user{1..27}; do
+
+for user in $(awk -F: '$3 > 999 && $3 != 65534 {print $1}' /etc/passwd); do
     if id $user &> /dev/null; then
         user_gecos=$(grep $user /etc/passwd | cut -d : -f 5 | cut -d , -f 1)
         while true
