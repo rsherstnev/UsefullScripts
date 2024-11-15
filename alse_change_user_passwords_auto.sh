@@ -2,7 +2,6 @@
 
 _RED_COLOR="\e[1;31m"
 _GREEN_COLOR="\e[1;32m"
-_YELLOW_COLOR="\e[1;33m"
 _COLOR_RESET="\e[0m"
 _ALPHABET="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=<>"
 
@@ -22,13 +21,15 @@ function report_fail {
 for user in secadmin sysadmin user{1..27}; do
     if id $user &> /dev/null; then
         user_gecos=$(grep $user /etc/passwd | cut -d : -f 5 | cut -d , -f 1)
-        generated_password=$(< /dev/urandom tr -dc $_ALPHABET | head -c12)
-        if echo $user:$generated_password | chpasswd &> /dev/null; then
-            report_success "Пароль пользователя с логином \"$user\" ($user_gecos) был успешно изменен на $generated_password"
-        else
-            report_fail "При изменении пароля пользователя с логином \"$user\" ($user_gecos) на $generated_password произошла ошибка! Проверьте соответствие сгенерированного пароля требованиям парольной политики!"
-        fi
+        while true
+        do
+            generated_password=$(< /dev/urandom tr -dc $_ALPHABET | head -c12)
+            if echo $user:$generated_password | chpasswd &> /dev/null; then
+                report_success "Пароль пользователя с логином \"$user\" ($user_gecos) был успешно изменен на $generated_password"
+                break
+            fi
+        done
     else
-        report_fail "Пользователь с логином \"$user\" отсутствует в системе"
+        report_fail "Пользователь с логином \"$user\" отсутствует в системе!"
     fi
 done
