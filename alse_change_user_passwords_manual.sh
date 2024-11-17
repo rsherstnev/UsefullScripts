@@ -1,3 +1,10 @@
+# Данный скрипт позволяет вручную поменять пароли нескольким пользователям системы
+# Если в аргументы скрипту ничего не передано, то скрипт извлекает из /etc/passwd всех несистемных пользователей и начинает изменять им пароль
+# Иначе скрипт начинает изменять пароли всех учетных записей, переданных скрипту в аргументах
+# Примеры использования скрипта:
+#    sudo ./alse_change_user_passwords_manual.sh
+#    sudo ./alse_change_user_passwords_manual.sh secadmin sysadmin user{1..27}
+
 #!/usr/bin/env bash
 
 _RED_COLOR="\e[1;31m"
@@ -17,19 +24,27 @@ function report_fail {
     echo -e "  ${_RED_COLOR}[FAIL] $1!${_COLOR_RESET}"
 }
 
-# Если необходимо поменять пароль только определенным пользователям, то нужно заменить цикл, например, на:
-# for user in secadmin sysadmin user{1..27}; do
+function change_password {
+    # Аргумент №1: логин пользователя, пароль которого необходимо изменить
+    user_gecos=$(grep $1 /etc/passwd | cut -d : -f 5 | cut -d , -f 1)
+    while true
+    do
+        report_step "Изменение пароля пользователя с логином \"$1\" ($user_gecos)";
+        if passwd $1; then
+            break
+        fi
+    done
+}
 
-for user in $(awk -F: '$3 > 999 && $3 != 65534 {print $1}' /etc/passwd); do
+if [[ $# == 0 ]]; then
+    users=$(awk -F: '$3 > 999 && $3 != 65534 {print $1}' /etc/passwd)
+else
+    users=$@
+fi
+
+for user in $users; do
     if id $user &> /dev/null; then
-        user_gecos=$(grep $user /etc/passwd | cut -d : -f 5 | cut -d , -f 1)
-        while true
-        do
-            report_step "Изменение пароля пользователя с логином \"$user\" ($user_gecos)";
-            if passwd $user; then
-                break
-            fi
-        done
+        change_password $user
     else
         report_fail "Пользователь с логином \"$user\" отсутствует в системе"
     fi
