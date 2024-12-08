@@ -134,10 +134,10 @@ sudo ./alse_change_user_passwords_manual.sh secadmin sysadmin user{1..27}
 
 Создать пользователей системы, количество которых будет считано интерактивно
 ```bash
-sudo ./alse_change_user_passwords_manual.sh
+sudo ./alse_create_users.sh
 ```
 
 Создать пользователей системы с логинами `secadmin`, `sysadmin` и `user1` ... `user27`
 ```bash
-sudo ./alse_change_user_passwords_manual.sh secadmin sysadmin user{1..27}
+sudo ./alse_create_users.sh secadmin sysadmin user{1..27}
 ```
