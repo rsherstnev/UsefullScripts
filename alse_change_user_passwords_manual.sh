@@ -26,7 +26,7 @@ function report_fail {
 
 function change_password {
     # Аргумент №1: логин пользователя, пароль которого необходимо изменить
-    user_gecos=$(grep $1 /etc/passwd | cut -d : -f 5 | cut -d , -f 1)
+    user_gecos=$(grep -w $1 /etc/passwd | cut -d : -f 5 | cut -d , -f 1)
     while true
     do
         report_step "Изменение пароля пользователя с логином \"$1\" ($user_gecos)";

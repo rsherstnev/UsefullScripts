@@ -10,7 +10,10 @@
 _RED_COLOR="\e[1;31m"
 _GREEN_COLOR="\e[1;32m"
 _COLOR_RESET="\e[0m"
-_ALPHABET="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=<>"
+_PASSWORD_LENGTH=10
+_ALPHABET="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$"
+# Закомментируйте алфавит выше и раскомментируйте данный для более сильных паролей
+# _ALPHABET="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=<>"
 
 if [[ $EUID != 0 ]]; then
     echo -e "${_RED_COLOR}!!! Данный скрипт должен быть запущен от имени root !!!${_COLOR_RESET}"
@@ -27,10 +30,10 @@ function report_fail {
 
 function change_password {
     # Аргумент №1: логин пользователя, пароль которого необходимо изменить
-    user_gecos=$(grep $1 /etc/passwd | cut -d : -f 5 | cut -d , -f 1)
+    user_gecos=$(grep -w $1 /etc/passwd | cut -d : -f 5 | cut -d , -f 1)
     while true
     do
-        generated_password=$(< /dev/urandom tr -dc $_ALPHABET | head -c12)
+        generated_password=$(< /dev/urandom tr -dc $_ALPHABET | head -c $_PASSWORD_LENGTH)
         if echo $1:$generated_password | chpasswd &> /dev/null; then
             report_success "Пароль пользователя с логином \"$1\" ($user_gecos) был успешно изменен на $generated_password"
             break
