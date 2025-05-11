@@ -48,16 +48,16 @@ function to_lower {
     echo $1 | awk '{print tolower($0)}'
 }
 
-function pipx_install {
-    if pipx install $1 &> /dev/null; then
+function uv_install {
+    if uv tool install $1 &> /dev/null; then
         report_success "Утилита \"$1\" была успешно установлена"
     else
         report_fail "При установке утилиты \"$1\" произошла ошибка"
     fi
 }
 
-function pipx_github_install {
-    if pipx install git+https://github.com/$1.git &> /dev/null; then
+function uv_github_install {
+    if uv tool install git+https://github.com/$1.git &> /dev/null; then
         report_success "Утилита \"$1\" была успешно установлена"
     else
         report_fail "При установке утилиты \"$1\" произошла ошибка"
@@ -70,21 +70,6 @@ function create_symlink {
     else
         report_fail "При создании симлинка на \"$1\" в \"$2\" произошла ошибка"
     fi
-}
-
-function make_pipenv_to_system {
-    PYTHON_PIPENV_TOOL_PATH=$1
-    PYTHON_PIPENV_DIR=$(dirname $1)
-    PYTHON_PIPENV_TOOL=$(basename $PYTHON_PIPENV_TOOL_PATH | cut -d . -f 1)
-    cd $PYTHON_PIPENV_DIR
-    pipenv install &> /dev/null
-    PYTHON_PIPENV_VENV_DIR=$(env PWD=$PYTHON_PIPENV_DIR pipenv --venv)
-    sed -i '1d' $PYTHON_PIPENV_TOOL_PATH
-    SHEBANG="#!$PYTHON_PIPENV_VENV_DIR/bin/python"
-    sed -i "1i ${SHEBANG}" $PYTHON_PIPENV_TOOL_PATH
-    create_symlink $PYTHON_PIPENV_TOOL_PATH $HOME/.local/bin/$(to_lower $PYTHON_PIPENV_TOOL)
-    cd
-    chmod +x $PYTHON_PIPENV_TOOL_PATH
 }
 
 report_step "Разблокировка пользователя root, задайте ему пароль"
@@ -105,7 +90,7 @@ for directory in \
     $HOME/.local/share/xfce4/terminal/colorschemes \
     $HOME/.local/share/{themes,icons} \
     $HOME/.zsh-custom-completions \
-    /opt/{docker-software/{c2,},docker-volumes,pipenv-software,python-venvs,exploits,htb,post/{docker,linux,windows,general},scripts,shells,software/{reverse,c2,bin,},custom_passwords} \
+    /opt/{docker-software/{c2,},docker-volumes,pipenv-software,exploits,ctf/{htb,hackerlab},post/{docker,linux,windows,general},scripts,shells,software/{reverse,c2,bin,},custom_passwords} \
     /pictures;
 do
     if [[ ! -d $directory ]]; then
@@ -118,7 +103,7 @@ do
 done
 
 report_step "Установка русского языка в систему"
-if sed '/ru_RU.UTF-8 UTF-8/s/^# //' -i /etc/locale.gen && locale-gen &> /dev/null; then
+if sed '/ru_RU.UTF-8 UTF-8/s/^# //' -i /etc/locale.gen && locale-gen &> /dev/null && update-locale LANG=ru_RU.UTF-8; then
     report_success "Русский язык был успешно установлен в систему"
 else
     report_fail "При установке русского языка в систему произошла ошибка"
@@ -154,14 +139,11 @@ else
     report_fail "При установке временной зоны \"Красноярск\" произошла ошибка"
 fi
 
-report_step "Создание необходимых симлинков"
-create_symlink $HOME/.local/share/pipx/venvs /opt/python-venvs/pipx-venvs
-create_symlink $HOME/.local/share/virtualenvs /opt/python-venvs/pipenv-venvs
-
 report_step "Установка необходимого для работы софта"
 for software in \
     apt-file \
     vim \
+    neovim \
     less \
     curl \
     wget \
@@ -170,11 +152,11 @@ for software in \
     git \
     python3-pip \
     pipenv \
-    pipx \
     tmux \
     fzf \
-    neovim \
+    htop \
     btop \
+    lnav \
     tailspin \
     openvpn \
     wireguard \
@@ -218,7 +200,7 @@ for software in \
     viewnior \
     flameshot \
     cherrytree \
-    keepass2 \
+    keepassxc-full \
     traceroute \
     remmina \
     findutils \
@@ -232,6 +214,12 @@ for software in \
     breeze-cursor-theme \
     arc-theme \
     xfce4-goodies \
+    gparted \
+    python3-httpx \
+    obsidian \
+    golang-go \
+    thunderbird \
+    menulibre \
     bind9-dnsutils;
 do
     if apt install -y $software &> /dev/null; then
@@ -254,8 +242,11 @@ report_step "Установка необходимого для тестиров
 for software in \
     nmap \
     ncat \
+    unicornscan \
+    smtp-user-enum \
     sqlmap \
     burpsuite \
+    zaproxy \
     exploitdb \
     metasploit-framework \
     impacket-scripts \
@@ -266,6 +257,7 @@ for software in \
     freerdp3-x11 \
     freerdp3-shadow-x11 \
     chisel \
+    dirbuster \
     proxychains4 \
     fping \
     arp-scan \
@@ -308,7 +300,12 @@ for software in \
     onesixtyone \
     jxplorer \
     nbtscan \
-    weevely;
+    weevely \
+    wordlists \
+    subfinder \
+    swaks \
+    trivy \
+    nuclei;
 do
     if apt install -y $software &> /dev/null; then
         report_success "Утилита \"$software\" была успешно установлена в систему"
@@ -317,24 +314,25 @@ do
     fi
 done
 
-report_step "Подготовка pipx к работе"
-if pipx ensurepath &> /dev/null && pipx ensurepath --global &> /dev/null; then
-    report_success "Pipx был успешно подготовлен к работе"
+report_step "Установка uv"
+if curl -LsSf https://astral.sh/uv/install.sh | sh &> /dev/null; then
+    report_success "UV был успешно установлен"
 else
-    report_fail "При подготовке к работе pipx возникли проблемы"
+    report_fail "При установке UV произошла ошибка"
 fi
 
-# report_step "Установка необходимых Python утилит"
-# for python_tool in \
-#     sqlmap \
-#     impacket;
-# do
-#     if pipx_install $python_tool &> /dev/null; then
-#         report_success "Python утилита \"$python_tool\" была успешно установлена"
-#     else
-#         report_fail "При установке python утилиты \"$python_tool\" произошла ошибка"
-#     fi
-# done
+report_step "Установка необходимых Python утилит с PyPI"
+for python_tool in \
+    sqlmap \
+    impacket \
+    tldr;
+do
+    if uv_install $python_tool &> /dev/null; then
+        report_success "Python утилита \"$python_tool\" была успешно установлена"
+    else
+        report_fail "При установке python утилиты \"$python_tool\" произошла ошибка"
+    fi
+done
 
 report_step "Установка необходимых Python утилит с GitHub"
 for python_repo in \
@@ -344,7 +342,7 @@ for python_repo in \
     "sc0tfree/updog" \
     "ShawnDEvans/smbmap" \
     "p0dalirius/smbclient-ng" \
-    "calebstewart/pwncat" \
+    "Chocapikk/pwncat-vl" \
     "brightio/penelope" \
     "cddmp/enum4linux-ng" \
     "httpie/http-prompt" \
@@ -358,9 +356,10 @@ for python_repo in \
     "darkoperator/dnsrecon" \
     "dirkjanm/adidnsdump" \
     "laramies/theHarvester" \
+    "blacklanternsecurity/MANSPIDER" \
     "elceef/dnstwist";
 do
-    if pipx_github_install $python_repo &> /dev/null; then
+    if uv_github_install $python_repo &> /dev/null; then
         report_success "Python утилита из GitHub репозитория \"https://github.com/$python_repo\" была успешно установлена"
     else
         report_fail "При установке python утилиты из GitHub репозитория \"https://github.com/$python_repo\" произошла ошибка"
@@ -377,6 +376,19 @@ do
         report_fail "При установке ruby утилиты \"$ruby_tool\" возникли проблемы"
     fi
 done
+
+report_step "Установка необходимых Go утилит с GitHub"
+for go_tool in \
+    "FalconOpsLLC/goexec";
+do
+    if go install github.com/$go_tool@latest &> /dev/null; then
+        report_success "Go утилита \"$go_tool\" была успешно установлена"
+    else
+        report_fail "При установке go утилиты \"$go_tool\" возникли проблемы"
+    fi
+done
+
+echo 'export PATH="$PATH:/root/go/bin"' >> /root/.zprofile
 
 report_step "Установка необходимых конфигов, скриптов, тем"
 # Установка личных конфигов
@@ -402,6 +414,7 @@ file_download https://raw.githubusercontent.com/rsherstnev/CTF/master/Scripts/se
 file_download https://raw.githubusercontent.com/rsherstnev/CTF/master/Scripts/revshellgen.py /opt/scripts/revshellgen.py
 file_download https://raw.githubusercontent.com/rsherstnev/CTF/master/Scripts/base64enpacker.py /opt/scripts/base64enpacker.py
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/tmux/vpn_ip.sh /opt/scripts/vpn_ip.sh
+chmod +x /opt/scripts/vpn_ip.sh
 
 report_step "Установка прогарммы \"vim-plug\" для управления плагинами Vim"
 if curl -fLo $HOME/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim; then
@@ -509,6 +522,7 @@ git_clone https://github.com/redcode-labs/Bashark /opt/post/linux/bashark
 git_clone https://github.com/DominicBreuker/pspy /opt/post/linux/pspy
 git_clone https://github.com/rasta-mouse/Sherlock /opt/post/windows/sherlock
 git_clone https://github.com/rasta-mouse/Watson /opt/post/windows/watson
+git_clone https://github.com/BC-SECURITY/Moriarty /opt/post/windows/moriarty
 git_clone https://github.com/AonCyberLabs/Windows-Exploit-Suggester /opt/post/windows/windows-exploit-suggester
 git_clone https://github.com/itm4n/PrivescCheck /opt/post/windows/privesccheck
 git_clone https://github.com/pentestmonkey/windows-privesc-check /opt/post/windows/windows-privesc-check
@@ -525,18 +539,10 @@ git_clone https://github.com/b374k/b374k /opt/shells/b374k
 git_clone https://github.com/pwndbg/pwndbg /opt/software/reverse/pwndbg/
 git_clone https://github.com/hugsy/gef /opt/software/reverse/gef
 git_clone https://github.com/cyrus-and/gdb-dashboard /opt/software/reverse/gdb-dashboard
-git_clone https://github.com/ropnop/windapsearch /opt/pipenv-software/windapsearch
-git_clone https://github.com/t3l3machus/Villain /opt/pipenv-software/villain
 git_clone https://github.com/zsh-users/zsh-syntax-highlighting $HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
 git_clone https://github.com/zsh-users/zsh-autosuggestions $HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions
 git_clone https://github.com/Aloxaf/fzf-tab $HOME/.oh-my-zsh/custom/plugins/fzf-tab
-
-report_step "Установка pyenv"
-if curl -L https://raw.githubusercontent.com/yyuu/pyenv-installer/master/bin/pyenv-installer | bash &> /dev/null; then
-    report_success "Pyenv был успешно установлен"
-else
-    report_fail "При установке pyenv произошла ошибка"
-fi
+git_clone https://github.com/tmux-plugins/tpm $HOME/.tmux/plugins/tpm
 
 report_step "Генерация и скачивание необходимых файлов zsh completions"
 if gobuster completion zsh > $HOME/.zsh-custom-completions/_gobuster; then
@@ -547,20 +553,38 @@ fi
 file_download https://raw.githubusercontent.com/docker/cli/master/contrib/completion/zsh/_docker $HOME/.zsh-custom-completions/_docker
 file_download https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/plugins/pip/_pip $HOME/.zsh-custom-completions/_pip
 
-report_step "Установка необходимых python утилит в виртуальные окружения"
-for tool_path in \
-    /opt/pipenv-software/windapsearch/windapsearch.py \
-    /opt/pipenv-software/villain/Villain.py;
-do
-    if make_pipenv_to_system $tool_path; then
-        report_success "Python утилита по адресу $tool_path успешно установлена в виртуальное окружение"
-    else
-        report_fail "При установке python утилиты по адресу $tool_path в виртуальное окружение произошла ошибка"
-    fi
-done
-
 report_step "Создание необходимых симлинков"
 create_symlink /opt/post/general/peass-ng/linPEAS /opt/post/linux/linPEAS
 create_symlink /opt/post/general/peass-ng/winPEAS /opt/post/windows/winPEAS
 
-# Скачать godap, delta, go-windapsearch, kerbrute
+# Мешает подключению через OpenVPN к Hack The Box
+# report_step "Отключение IPv6"
+# if echo "net.ipv6.conf.all.disable_ipv6 = 1" > /etc/sysctl.d/00-ipv6disable.conf && sysctl --system &> /dev/null; then
+#     report_success "IPv6 был успешно отключен"
+# else
+#     report_fail "При отключении IPv6 произошла ошибка"
+# fi
+
+report_step "Установка текстового редактора Zed"
+if curl -f https://zed.dev/install.sh | sh &> /dev/null; then
+    report_success "Zed был успешно установлен"
+else
+    report_fail "При установке Zed произошла ошибка"
+fi
+
+report_step "Установка текстового редактора VS Code"
+wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /etc/apt/trusted.gpg.d/microsoft.gpg
+echo "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main" > /etc/apt/sources.list.d/vscode.list
+apt update
+if apt install -y code &> /dev/null; then
+    report_success "Утилита VSCode была успешно установлена в систему"
+else
+    report_fail "При установке утилиты VSCode произошла ошибка"
+fi
+
+report_step "Установка Rust"
+if curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh &> /dev/null; then
+    report_success "Rust был успешно установлен"
+else
+    report_fail "При установке Rust произошла ошибка"
+fi
