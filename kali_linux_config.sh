@@ -44,10 +44,6 @@ function git_clone {
     fi
 }
 
-function to_lower {
-    echo $1 | awk '{print tolower($0)}'
-}
-
 function uv_install {
     if uv tool install $1 &> /dev/null; then
         report_success "Утилита \"$1\" была успешно установлена"
@@ -90,7 +86,7 @@ for directory in \
     $HOME/.local/share/xfce4/terminal/colorschemes \
     $HOME/.local/share/{themes,icons} \
     $HOME/.zsh-custom-completions \
-    /opt/{docker-software/{c2,},docker-volumes,pipenv-software,exploits,ctf/{htb,hackerlab},post/{docker,linux,windows,general},scripts,shells,software/{reverse,c2,bin,},custom_passwords} \
+    /opt/{docker-software,python-software,docker-volumes,exploits,hackthebox,hackerlab,tryhackme,post/{docker,linux,windows,general},scripts,shells,software,custom_passwords} \
     /pictures;
 do
     if [[ ! -d $directory ]]; then
@@ -110,14 +106,14 @@ else
 fi
 
 report_step "Изменение наименований стандартных директорий хомяка на кастомные"
-if sed -Ei 's/DESKTOP=.*/DESKTOP=desktop/g' /etc/xdg/user-dirs.defaults &&
-    sed -Ei 's/DOWNLOAD=.*/DOWNLOAD=downloads/g' /etc/xdg/user-dirs.defaults &&
-    sed -Ei 's/TEMPLATES=.*/TEMPLATES=templates/g' /etc/xdg/user-dirs.defaults &&
-    sed -Ei 's/PUBLICSHARE=.*/PUBLICSHARE=public/g' /etc/xdg/user-dirs.defaults &&
-    sed -Ei 's/DOCUMENTS=.*/DOCUMENTS=documents/g' /etc/xdg/user-dirs.defaults &&
-    sed -Ei 's/MUSIC=.*/MUSIC=music/g' /etc/xdg/user-dirs.defaults &&
-    sed -Ei 's/PICTURES=.*/PICTURES=pictures/g' /etc/xdg/user-dirs.defaults &&
-    sed -Ei 's/VIDEOS=.*/VIDEOS=videos/g' /etc/xdg/user-dirs.defaults &&
+if sed -Ei 's/DESKTOP=.*/DESKTOP=Desktop/g' /etc/xdg/user-dirs.defaults &&
+    sed -Ei 's/DOWNLOAD=.*/DOWNLOAD=Downloads/g' /etc/xdg/user-dirs.defaults &&
+    sed -Ei 's/TEMPLATES=.*/TEMPLATES=Templates/g' /etc/xdg/user-dirs.defaults &&
+    sed -Ei 's/PUBLICSHARE=.*/PUBLICSHARE=Public/g' /etc/xdg/user-dirs.defaults &&
+    sed -Ei 's/DOCUMENTS=.*/DOCUMENTS=Documents/g' /etc/xdg/user-dirs.defaults &&
+    sed -Ei 's/MUSIC=.*/MUSIC=Music/g' /etc/xdg/user-dirs.defaults &&
+    sed -Ei 's/PICTURES=.*/PICTURES=Pictures/g' /etc/xdg/user-dirs.defaults &&
+    sed -Ei 's/VIDEOS=.*/VIDEOS=Videos/g' /etc/xdg/user-dirs.defaults &&
     echo en_US > $HOME/.config/user-dirs.locale; then
     report_success "Наименования стандартных директорий хомяка были успешно изменены на кастомные"
 else
@@ -151,7 +147,6 @@ for software in \
     zsh \
     git \
     python3-pip \
-    pipenv \
     tmux \
     fzf \
     htop \
@@ -167,10 +162,9 @@ for software in \
     rlwrap \
     tcpdump \
     tshark \
-    termshark \
     wireshark \
     man-db \
-    mousepad \
+    gedit \
     tig \
     alacarte \
     mawk \
@@ -184,7 +178,6 @@ for software in \
     zulucrypt-gui \
     zulumount-cli \
     zulumount-gui \
-    whowatch \
     ripgrep \
     jq \
     bat \
@@ -215,11 +208,18 @@ for software in \
     arc-theme \
     xfce4-goodies \
     gparted \
-    python3-httpx \
     obsidian \
     golang-go \
     thunderbird \
-    menulibre \
+    powershell \
+    zoxide \
+    git-delta \
+    asciinema \
+    gping \
+    broot \
+    libcurl4-openssl-dev \
+    build-essential \
+    libssl-dev \
     bind9-dnsutils;
 do
     if apt install -y $software &> /dev/null; then
@@ -242,14 +242,11 @@ report_step "Установка необходимого для тестиров
 for software in \
     nmap \
     ncat \
-    unicornscan \
+    impacket-scripts \
     smtp-user-enum \
-    sqlmap \
     burpsuite \
-    zaproxy \
     exploitdb \
     metasploit-framework \
-    impacket-scripts \
     responder \
     bettercap \
     bettercap-caplets \
@@ -257,7 +254,6 @@ for software in \
     freerdp3-x11 \
     freerdp3-shadow-x11 \
     chisel \
-    dirbuster \
     proxychains4 \
     fping \
     arp-scan \
@@ -292,7 +288,6 @@ for software in \
     strace \
     feroxbuster \
     patator \
-    wfuzz \
     ligolo-ng \
     macchanger \
     arping \
@@ -304,7 +299,15 @@ for software in \
     wordlists \
     subfinder \
     swaks \
+    sliver \
+    havoc \
     trivy \
+    windows-binaries \
+    sbd \
+    rizin-cutter \
+    gitleaks \
+    trufflehog \
+    nikto \
     nuclei;
 do
     if apt install -y $software &> /dev/null; then
@@ -321,11 +324,19 @@ else
     report_fail "При установке UV произошла ошибка"
 fi
 
+export PATH="$PATH:/root/.local/bin/"
+
 report_step "Установка необходимых Python утилит с PyPI"
 for python_tool in \
     sqlmap \
-    impacket \
-    tldr;
+    pyinstaller \
+    litecli \
+    certipy-ad \
+    defaultcreds-cheat-sheet \
+    coercer \
+    wapiti3 \
+    git-dumper \
+    sshuttle;
 do
     if uv_install $python_tool &> /dev/null; then
         report_success "Python утилита \"$python_tool\" была успешно установлена"
@@ -333,6 +344,12 @@ do
         report_fail "При установке python утилиты \"$python_tool\" произошла ошибка"
     fi
 done
+
+if uv_install wfuzz --python 3.8 &> /dev/null; then
+    report_success "Python утилита \"wfuzz\" была успешно установлена"
+else
+    report_fail "При установке python утилиты \"wfuzz\" произошла ошибка"
+fi
 
 report_step "Установка необходимых Python утилит с GitHub"
 for python_repo in \
@@ -357,14 +374,27 @@ for python_repo in \
     "dirkjanm/adidnsdump" \
     "laramies/theHarvester" \
     "blacklanternsecurity/MANSPIDER" \
+    "login-securite/DonPAPI" \
+    "PShlyundin/ldap_shell" \
+    "yaap7/ldapsearch-ad" \
+    "CravateRouge/bloodyAD" \
+    "aniqfakhrul/powerview.py" \
+    "isd-project/isd" \
+    "cogiceo/GPOHound" \
     "elceef/dnstwist";
 do
     if uv_github_install $python_repo &> /dev/null; then
         report_success "Python утилита из GitHub репозитория \"https://github.com/$python_repo\" была успешно установлена"
     else
         report_fail "При установке python утилиты из GitHub репозитория \"https://github.com/$python_repo\" произошла ошибка"
-    fi 
+    fi
 done
+
+if uv_github_install "calebstewart/pwncat" --python 3.9 &> /dev/null; then
+    report_success "Python утилита из GitHub репозитория \"https://github.com/calebstewart/pwncat\" была успешно установлена"
+else
+    report_fail "При установке python утилиты из GitHub репозитория \"https://github.com/calebstewart/pwncat\" произошла ошибка"
+fi
 
 report_step "Установка необходимых Ruby утилит"
 for ruby_tool in \
@@ -377,9 +407,30 @@ do
     fi
 done
 
+export GOPATH=$HOME/go
+export PATH=$PATH:$GOPATH/bin
+
 report_step "Установка необходимых Go утилит с GitHub"
 for go_tool in \
-    "FalconOpsLLC/goexec";
+    "FalconOpsLLC/goexec" \
+    "projectdiscovery/httpx/cmd/httpx" \
+    "jesseduffield/lazygit" \
+    "jesseduffield/lazydocker" \
+    "asdf-vm/asdf" \
+    "muesli/duf" \
+    "moonD4rk/HackBrowserData" \
+    "ropnop/kerbrute" \
+    "xm1k3/cent" \
+    "Macmod/godap" \
+    "jfjallid/go-secdump" \
+    "ropnop/go-windapsearch" \
+    "sensepost/goLAPS" \
+    "Goodies365/YandexDecrypt" \
+    "sensepost/gowitness" \
+    "Chocapikk/wpprobe" \
+    "patrickhener/goshs" \
+    "projectdiscovery/katana" \
+    "TheManticoreProject/FindGPPPasswords";
 do
     if go install github.com/$go_tool@latest &> /dev/null; then
         report_success "Go утилита \"$go_tool\" была успешно установлена"
@@ -389,6 +440,39 @@ do
 done
 
 echo 'export PATH="$PATH:/root/go/bin"' >> /root/.zprofile
+
+report_step "Установка Rust"
+if curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y &> /dev/null; then
+    report_success "Rust был успешно установлен"
+else
+    report_fail "При установке Rust произошла ошибка"
+fi
+source "$HOME/.cargo/env"
+echo 'source "$HOME/.cargo/env"' >> $HOME/.zshrc
+
+report_step "Установка необходимых Rust утилит с crates.io"
+for rust_tool in \
+    atuin \
+    navi \
+    bandwhich \
+    ripgrep_all \
+    htmlq \
+    sd \
+    procs \
+    tealdeer \
+    jless \
+    trippy \
+    hwatch \
+    xcp \
+    rustcat \
+    rustscan;
+do
+    if cargo install $rust_tool &> /dev/null; then
+        report_success "Rust утилита \"$rust_tool\" была успешно установлена"
+    else
+        report_fail "При установке rust утилиты \"$rust_tool\" возникли проблемы"
+    fi
+done
 
 report_step "Установка необходимых конфигов, скриптов, тем"
 # Установка личных конфигов
@@ -405,7 +489,6 @@ file_download https://raw.githubusercontent.com/dracula/midnight-commander/maste
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/mc/ini $HOME/.config/mc/ini
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/mc/panels.ini $HOME/.config/mc/panels.ini
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/git/.gitconfig $HOME/.gitconfig
-file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/btop/btop.conf $HOME/.config/btop/btop.conf
 # Установка тем
 file_download https://raw.githubusercontent.com/dracula/xfce4-terminal/master/Dracula.theme $HOME/.local/share/xfce4/terminal/colorschemes/Dracula.theme
 file_download https://raw.githubusercontent.com/dracula/qterminal/refs/heads/main/Dracula.colorscheme /usr/share/qtermwidget5/color-schemes/Dracula.colorscheme
@@ -417,7 +500,7 @@ file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/t
 chmod +x /opt/scripts/vpn_ip.sh
 
 report_step "Установка прогарммы \"vim-plug\" для управления плагинами Vim"
-if curl -fLo $HOME/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim; then
+if curl -fLo $HOME/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim &> /dev/null; then
     report_success "Прогармма \"vim-plug\" для управления плагинами Vim была установлена успешно"
 else
     report_fail "При установке прогарммы \"vim-plug\" для управления плагинами Vim произошла ошибка"
@@ -511,8 +594,15 @@ else
 fi
 
 report_step "Клонирование необходимых репозиториев с GitHub"
+# My Custom
 git_clone https://github.com/rsherstnev/zshcompletions $HOME/.zsh-custom-completions
-git_clone https://github.com/carlospolop/PEASS-ng /opt/post/general/peass-ng
+git_clone https://github.com/zsh-users/zsh-syntax-highlighting $HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
+git_clone https://github.com/zsh-users/zsh-autosuggestions $HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+git_clone https://github.com/Aloxaf/fzf-tab $HOME/.oh-my-zsh/custom/plugins/fzf-tab
+git_clone https://github.com/tmux-plugins/tpm $HOME/.tmux/plugins/tpm
+# Post Recon and Exploitation
+git_clone https://github.com/peass-ng/PEASS-ng /opt/post/general/peass-ng
+git_clone https://github.com/61106960/adPEAS /opt/post/general/adpeas
 git_clone https://github.com/rebootuser/LinEnum /opt/post/linux/linenum
 git_clone https://github.com/The-Z-Labs/linux-exploit-suggester /opt/post/linux/linux-exploit-suggester
 git_clone https://github.com/jondonas/linux-exploit-suggester-2 /opt/post/linux/linux-exploit-suggester-2
@@ -520,29 +610,39 @@ git_clone https://github.com/diego-treitos/linux-smart-enumeration /opt/post/lin
 git_clone https://github.com/sleventyeleven/linuxprivchecker /opt/post/linux/linuxprivchecker
 git_clone https://github.com/redcode-labs/Bashark /opt/post/linux/bashark
 git_clone https://github.com/DominicBreuker/pspy /opt/post/linux/pspy
+git_clone https://github.com/liamg/traitor /opt/post/linux/traitor
+git_clone https://github.com/lefayjey/linWinPwn /opt/post/windows/linwinpwn
 git_clone https://github.com/rasta-mouse/Sherlock /opt/post/windows/sherlock
 git_clone https://github.com/rasta-mouse/Watson /opt/post/windows/watson
 git_clone https://github.com/BC-SECURITY/Moriarty /opt/post/windows/moriarty
+git_clone https://github.com/GhostPack/Seatbelt /opt/post/windows/seatbelt
 git_clone https://github.com/AonCyberLabs/Windows-Exploit-Suggester /opt/post/windows/windows-exploit-suggester
 git_clone https://github.com/itm4n/PrivescCheck /opt/post/windows/privesccheck
 git_clone https://github.com/pentestmonkey/windows-privesc-check /opt/post/windows/windows-privesc-check
 git_clone https://github.com/411Hall/JAWS /opt/post/windows/jaws
 git_clone https://github.com/bitsadmin/wesng /opt/post/windows/wesng
 git_clone https://github.com/Flangvik/SharpCollection /opt/post/windows/sharpcollection
+git_clone https://github.com/AlessandroZ/LaZagne /opt/post/windows/lazagne
+git_clone https://github.com/Group3r/Group3r /opt/post/windows/group3r
+git_clone https://github.com/S3cur3Th1sSh1t/WinPwn /opt/post/windows/winpwn
+git_clone https://github.com/rootm0s/WinPwnage /opt/post/windows/winpwnage
 git_clone https://github.com/stealthcopter/deepce /opt/post/docker/deepce
+# Shells
 git_clone https://github.com/besimorhino/powercat /opt/shells/powercat
 git_clone https://github.com/antonioCoco/ConPtyShell /opt/shells/conptyshell
-git_clone https://github.com/3v4Si0N/HTTP-revshell /opt/shells/http-revshell
 git_clone https://github.com/flozz/p0wny-shell /opt/shells/p0wny-shell
 git_clone https://github.com/Arrexel/phpbash /opt/shells/phpbash
 git_clone https://github.com/b374k/b374k /opt/shells/b374k
-git_clone https://github.com/pwndbg/pwndbg /opt/software/reverse/pwndbg/
-git_clone https://github.com/hugsy/gef /opt/software/reverse/gef
-git_clone https://github.com/cyrus-and/gdb-dashboard /opt/software/reverse/gdb-dashboard
-git_clone https://github.com/zsh-users/zsh-syntax-highlighting $HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
-git_clone https://github.com/zsh-users/zsh-autosuggestions $HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions
-git_clone https://github.com/Aloxaf/fzf-tab $HOME/.oh-my-zsh/custom/plugins/fzf-tab
-git_clone https://github.com/tmux-plugins/tpm $HOME/.tmux/plugins/tpm
+# Python Tools
+git_clone https://github.com/t3l3machus/hoaxshell /opt/python-software/hoaxshell
+git_clone https://github.com/t3l3machus/Villain /opt/python-software/villain
+git_clone https://github.com/offsecginger/koadic /opt/python-software/koadic
+# Tools
+git_clone https://github.com/Adaptix-Framework/AdaptixC2 /opt/software/AdaptixC2
+git_clone https://github.com/internetwache/GitTools /opt/software/gittools
+# Exploits
+git_clone https://github.com/cybrly/badsuccessor /opt/exploits/badsuccessor
+git_clone https://github.com/topotam/PetitPotam /opt/exploits/petitpotam
 
 report_step "Генерация и скачивание необходимых файлов zsh completions"
 if gobuster completion zsh > $HOME/.zsh-custom-completions/_gobuster; then
@@ -566,25 +666,25 @@ create_symlink /opt/post/general/peass-ng/winPEAS /opt/post/windows/winPEAS
 # fi
 
 report_step "Установка текстового редактора Zed"
-if curl -f https://zed.dev/install.sh | sh &> /dev/null; then
+if curl -fs https://zed.dev/install.sh | sh &> /dev/null; then
     report_success "Zed был успешно установлен"
 else
     report_fail "При установке Zed произошла ошибка"
 fi
 
 report_step "Установка текстового редактора VS Code"
-wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /etc/apt/trusted.gpg.d/microsoft.gpg
+wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /etc/apt/trusted.gpg.d/microsoft.gpg &> /dev/null
 echo "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main" > /etc/apt/sources.list.d/vscode.list
-apt update
+apt update &> /dev/null
 if apt install -y code &> /dev/null; then
     report_success "Утилита VSCode была успешно установлена в систему"
 else
     report_fail "При установке утилиты VSCode произошла ошибка"
 fi
 
-report_step "Установка Rust"
-if curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh &> /dev/null; then
-    report_success "Rust был успешно установлен"
+report_step "Установка браузера Brave"
+if curl -fsS https://dl.brave.com/install.sh | sh &> /dev/null; then
+    report_success "Браузер Brave был успешно установлен"
 else
-    report_fail "При установке Rust произошла ошибка"
+    report_fail "При установке браузера Brave произошла ошибка"
 fi
