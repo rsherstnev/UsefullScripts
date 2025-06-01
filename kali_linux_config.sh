@@ -68,6 +68,8 @@ function create_symlink {
     fi
 }
 
+touch $HOME/.hushlogin
+
 report_step "Разблокировка пользователя root, задайте ему пароль"
 if passwd; then
     report_success "Пользователь root был успешно разблокирован"
@@ -86,7 +88,7 @@ for directory in \
     $HOME/.local/share/xfce4/terminal/colorschemes \
     $HOME/.local/share/{themes,icons} \
     $HOME/.zsh-custom-completions \
-    /opt/{docker-software,python-software,docker-volumes,exploits,hackthebox,hackerlab,tryhackme,post/{docker,linux,windows,general},scripts,shells,software,custom_passwords} \
+    /opt/{docker-software,docker-volumes,python-software,exploits,CTF/{htb,thm,hackerlab},post/{docker,linux,windows,general},scripts,shells,software,custom-passwords} \
     /pictures;
 do
     if [[ ! -d $directory ]]; then
@@ -211,6 +213,7 @@ for software in \
     obsidian \
     golang-go \
     thunderbird \
+    evolution \
     powershell \
     zoxide \
     git-delta \
@@ -220,6 +223,16 @@ for software in \
     libcurl4-openssl-dev \
     build-essential \
     libssl-dev \
+    redis-tools \
+    sqlitebrowser \
+    doublecmd-gtk \
+    tigervnc-viewer \
+    fastfetch \
+    neomutt \
+    python3-argcomplete \
+    grub-customizer \
+    conky-all \
+    conky-manager \
     bind9-dnsutils;
 do
     if apt install -y $software &> /dev/null; then
@@ -241,6 +254,7 @@ fi
 report_step "Установка необходимого для тестирования на проникновение софта"
 for software in \
     nmap \
+    zenmap \
     ncat \
     impacket-scripts \
     smtp-user-enum \
@@ -305,6 +319,7 @@ for software in \
     windows-binaries \
     sbd \
     rizin-cutter \
+    ghidra \
     gitleaks \
     trufflehog \
     nikto \
@@ -336,6 +351,7 @@ for python_tool in \
     coercer \
     wapiti3 \
     git-dumper \
+    mitmproxy \
     sshuttle;
 do
     if uv_install $python_tool &> /dev/null; then
@@ -381,6 +397,9 @@ for python_repo in \
     "aniqfakhrul/powerview.py" \
     "isd-project/isd" \
     "cogiceo/GPOHound" \
+    "Hackndo/pyGPOAbuse" \
+    "casterbyte/Above" \
+    "garrettfoster13/sccmhunter" \
     "elceef/dnstwist";
 do
     if uv_github_install $python_repo &> /dev/null; then
@@ -416,21 +435,18 @@ for go_tool in \
     "projectdiscovery/httpx/cmd/httpx" \
     "jesseduffield/lazygit" \
     "jesseduffield/lazydocker" \
-    "asdf-vm/asdf" \
+    "asdf-vm/asdf/cmd/asdf" \
     "muesli/duf" \
-    "moonD4rk/HackBrowserData" \
     "ropnop/kerbrute" \
     "xm1k3/cent" \
     "Macmod/godap" \
     "jfjallid/go-secdump" \
-    "ropnop/go-windapsearch" \
-    "sensepost/goLAPS" \
-    "Goodies365/YandexDecrypt" \
+    "ropnop/go-windapsearch/cmd/windapsearch" \
     "sensepost/gowitness" \
     "Chocapikk/wpprobe" \
     "patrickhener/goshs" \
-    "projectdiscovery/katana" \
-    "TheManticoreProject/FindGPPPasswords";
+    "projectdiscovery/katana/cmd/katana" \
+    "rverton/webanalyze/cmd/webanalyze";
 do
     if go install github.com/$go_tool@latest &> /dev/null; then
         report_success "Go утилита \"$go_tool\" была успешно установлена"
@@ -448,7 +464,6 @@ else
     report_fail "При установке Rust произошла ошибка"
 fi
 source "$HOME/.cargo/env"
-echo 'source "$HOME/.cargo/env"' >> $HOME/.zshrc
 
 report_step "Установка необходимых Rust утилит с crates.io"
 for rust_tool in \
@@ -460,7 +475,6 @@ for rust_tool in \
     sd \
     procs \
     tealdeer \
-    jless \
     trippy \
     hwatch \
     xcp \
@@ -489,9 +503,9 @@ file_download https://raw.githubusercontent.com/dracula/midnight-commander/maste
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/mc/ini $HOME/.config/mc/ini
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/mc/panels.ini $HOME/.config/mc/panels.ini
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/git/.gitconfig $HOME/.gitconfig
+file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/refs/heads/master/.conkyrc $HOME/.conkyrc
 # Установка тем
 file_download https://raw.githubusercontent.com/dracula/xfce4-terminal/master/Dracula.theme $HOME/.local/share/xfce4/terminal/colorschemes/Dracula.theme
-file_download https://raw.githubusercontent.com/dracula/qterminal/refs/heads/main/Dracula.colorscheme /usr/share/qtermwidget5/color-schemes/Dracula.colorscheme
 # Установка личных скриптов
 file_download https://raw.githubusercontent.com/rsherstnev/CTF/master/Scripts/searchnmapscript.py /opt/scripts/searchnmapscript.py
 file_download https://raw.githubusercontent.com/rsherstnev/CTF/master/Scripts/revshellgen.py /opt/scripts/revshellgen.py
@@ -525,7 +539,7 @@ else
 fi
 
 report_step "Скачивание необходимых docker файлов"
-if git clone --recurse-submodules https://github.com/cobbr/Covenant /opt/docker-software/c2/covenant &> /dev/null; then
+if git clone --recurse-submodules https://github.com/cobbr/Covenant /opt/docker-software/covenant &> /dev/null; then
     report_success "Docker файл \"covenant\" был успешно загружен"
 else
     report_fail "При загрузке docker файла \"covenant\" произошла ошибка"
@@ -533,7 +547,8 @@ fi
 
 report_step "Скачивание необходимых docker образов"
 for repo in \
-    bcsecurity/empire:latest;
+    bcsecurity/empire:latest \
+    kalilinux/kali-rolling;
 do
     if docker pull $repo &> /dev/null; then
         report_success "Docker образ \"$repo\" был успешно загружен"
@@ -543,7 +558,7 @@ do
 done
 
 report_step "Построение необходимых docker образов"
-if docker build -t covenant /opt/docker-software/c2/covenant/Covenant &> /dev/null; then
+if docker build -t covenant /opt/docker-software/covenant/Covenant &> /dev/null; then
     report_success "Докер образ \"covenant\" был успешно построен"
 else
     report_fail "При построении docker образа \"covenant\" произошла ошибка"
@@ -575,7 +590,7 @@ do
 done
 
 report_step "Копирование необходимых данных в постоянное хранилище \"covenant-data\" для docker контейнеров"
-if cp -r /opt/docker-software/c2/covenant/Covenant/Data/* /opt/docker-volumes/covenant-data/ &> /dev/null; then
+if cp -r /opt/docker-software/covenant/Covenant/Data/* /opt/docker-volumes/covenant-data/ &> /dev/null; then
     report_success "Необходимые данные в постоянное хранилище \"covenant-data\" были успешно скопированы"
 else
     report_fail "При копировании необходимых данных в постоянное хранилище \"covenant-data\" произошла ошибка"
@@ -587,7 +602,7 @@ if docker create --name empire -v empire-data:/data -p 443:443 -p 127.0.0.1:1337
 else
     report_fail "При создании docker контейнера \"empire\" произошла ошибка"
 fi
-if docker create --name covenant -v covenant-data:/app/Data covenant -p 80:80 -p 443:443 -p 127.0.0.1:7443:7443 &> /dev/null; then
+if docker create --name covenant -v covenant-data:/app/Data -p 80:80 -p 443:443 -p 127.0.0.1:7443:7443 covenant &> /dev/null; then
     report_success "Docker контейнер \"covenant\" был успешно создан"
 else
     report_fail "При создании docker контейнера \"covenant\" произошла ошибка"
@@ -600,9 +615,12 @@ git_clone https://github.com/zsh-users/zsh-syntax-highlighting $HOME/.oh-my-zsh/
 git_clone https://github.com/zsh-users/zsh-autosuggestions $HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions
 git_clone https://github.com/Aloxaf/fzf-tab $HOME/.oh-my-zsh/custom/plugins/fzf-tab
 git_clone https://github.com/tmux-plugins/tpm $HOME/.tmux/plugins/tpm
-# Post Recon and Exploitation
+# General Post Recon and Exploitation
 git_clone https://github.com/peass-ng/PEASS-ng /opt/post/general/peass-ng
 git_clone https://github.com/61106960/adPEAS /opt/post/general/adpeas
+git_clone https://github.com/moonD4rk/HackBrowserData /opt/post/general/hack-browser-data
+git_clone https://github.com/Goodies365/YandexDecrypt /opt/post/general/yandexdecrypt
+# Linux Post Recon and Exploitation
 git_clone https://github.com/rebootuser/LinEnum /opt/post/linux/linenum
 git_clone https://github.com/The-Z-Labs/linux-exploit-suggester /opt/post/linux/linux-exploit-suggester
 git_clone https://github.com/jondonas/linux-exploit-suggester-2 /opt/post/linux/linux-exploit-suggester-2
@@ -611,11 +629,14 @@ git_clone https://github.com/sleventyeleven/linuxprivchecker /opt/post/linux/lin
 git_clone https://github.com/redcode-labs/Bashark /opt/post/linux/bashark
 git_clone https://github.com/DominicBreuker/pspy /opt/post/linux/pspy
 git_clone https://github.com/liamg/traitor /opt/post/linux/traitor
+# Windows Post Recon and Exploitation
 git_clone https://github.com/lefayjey/linWinPwn /opt/post/windows/linwinpwn
 git_clone https://github.com/rasta-mouse/Sherlock /opt/post/windows/sherlock
 git_clone https://github.com/rasta-mouse/Watson /opt/post/windows/watson
 git_clone https://github.com/BC-SECURITY/Moriarty /opt/post/windows/moriarty
 git_clone https://github.com/GhostPack/Seatbelt /opt/post/windows/seatbelt
+git_clone https://github.com/sensepost/goLAPS/ /opt/post/windows/golaps
+git_clone https://github.com/TheManticoreProject/FindGPPPasswords /opt/post/windows/findgpppasswords
 git_clone https://github.com/AonCyberLabs/Windows-Exploit-Suggester /opt/post/windows/windows-exploit-suggester
 git_clone https://github.com/itm4n/PrivescCheck /opt/post/windows/privesccheck
 git_clone https://github.com/pentestmonkey/windows-privesc-check /opt/post/windows/windows-privesc-check
@@ -626,6 +647,7 @@ git_clone https://github.com/AlessandroZ/LaZagne /opt/post/windows/lazagne
 git_clone https://github.com/Group3r/Group3r /opt/post/windows/group3r
 git_clone https://github.com/S3cur3Th1sSh1t/WinPwn /opt/post/windows/winpwn
 git_clone https://github.com/rootm0s/WinPwnage /opt/post/windows/winpwnage
+# Docker Post Recon and Exploitation
 git_clone https://github.com/stealthcopter/deepce /opt/post/docker/deepce
 # Shells
 git_clone https://github.com/besimorhino/powercat /opt/shells/powercat
@@ -640,9 +662,13 @@ git_clone https://github.com/offsecginger/koadic /opt/python-software/koadic
 # Tools
 git_clone https://github.com/Adaptix-Framework/AdaptixC2 /opt/software/AdaptixC2
 git_clone https://github.com/internetwache/GitTools /opt/software/gittools
+git_clone https://github.com/akhomlyuk/btconverter /opt/software/btconverter
+git_clone https://github.com/s0i37/crawl /opt/software/crawl
 # Exploits
 git_clone https://github.com/cybrly/badsuccessor /opt/exploits/badsuccessor
 git_clone https://github.com/topotam/PetitPotam /opt/exploits/petitpotam
+# Docker
+git_clone https://github.com/SabyasachiRana/WebMap /opt/docker-software/webmap
 
 report_step "Генерация и скачивание необходимых файлов zsh completions"
 if gobuster completion zsh > $HOME/.zsh-custom-completions/_gobuster; then
@@ -657,21 +683,6 @@ report_step "Создание необходимых симлинков"
 create_symlink /opt/post/general/peass-ng/linPEAS /opt/post/linux/linPEAS
 create_symlink /opt/post/general/peass-ng/winPEAS /opt/post/windows/winPEAS
 
-# Мешает подключению через OpenVPN к Hack The Box
-# report_step "Отключение IPv6"
-# if echo "net.ipv6.conf.all.disable_ipv6 = 1" > /etc/sysctl.d/00-ipv6disable.conf && sysctl --system &> /dev/null; then
-#     report_success "IPv6 был успешно отключен"
-# else
-#     report_fail "При отключении IPv6 произошла ошибка"
-# fi
-
-report_step "Установка текстового редактора Zed"
-if curl -fs https://zed.dev/install.sh | sh &> /dev/null; then
-    report_success "Zed был успешно установлен"
-else
-    report_fail "При установке Zed произошла ошибка"
-fi
-
 report_step "Установка текстового редактора VS Code"
 wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /etc/apt/trusted.gpg.d/microsoft.gpg &> /dev/null
 echo "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main" > /etc/apt/sources.list.d/vscode.list
@@ -682,9 +693,28 @@ else
     report_fail "При установке утилиты VSCode произошла ошибка"
 fi
 
-report_step "Установка браузера Brave"
-if curl -fsS https://dl.brave.com/install.sh | sh &> /dev/null; then
-    report_success "Браузер Brave был успешно установлен"
+report_step "Установка текстового редактора Zed"
+if curl -fs https://zed.dev/install.sh | sh &> /dev/null; then
+    report_success "Zed был успешно установлен"
 else
-    report_fail "При установке браузера Brave произошла ошибка"
+    report_fail "При установке Zed произошла ошибка"
 fi
+
+report_step "Установка Pwndbg"
+if curl -qsL 'https://install.pwndbg.re' | sh -s -- -t pwndbg-gdb &> /dev/null; then
+    report_success "PwnDbg был успешно установлен"
+else
+    report_fail "При установке PwnDbg произошла ошибка"
+fi
+
+echo "" >> $HOME/.zshrc
+echo 'source "$HOME/.cargo/env"' >> $HOME/.zshrc
+echo 'export "GOPATH=$HOME/go"' >> $HOME/.zshrc
+echo 'export "PATH=$PATH:$GOPATH/bin"' >> $HOME/.zshrc
+
+report_step "
+Установить вручную:
+- Yandex Browser (https://browser.yandex.ru/)
+- DrawIo (https://github.com/jgraph/drawio-desktop/releases)
+- Postman (https://www.postman.com/)
+- NotepadNext (https://github.com/dail8859/NotepadNext/releases)"

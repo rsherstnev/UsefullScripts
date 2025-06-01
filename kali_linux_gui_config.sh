@@ -23,7 +23,7 @@ function report_fail {
 }
 
 function set_command_hotkey {
-    if xfconf-query -c xfce4-keyboard-shortcuts -p "/commands/custom/$1" -t string -s "$2" &> /dev/null || xfconf-query -c xfce4-keyboard-shortcuts -n -p "/commands/custom/$1" -t string -s "$2" &> /dev/null; then
+    if xfconf-query -c xfce4-keyboard-shortcuts -n -p "/commands/custom/$1" -t string -s "$2" &> /dev/null; then
         report_success "Горячая клавиша \"$1\" для действия \"$2\" была успешно назначена"
     else
         report_fail "При назначении горячей клавиши \"$1\" для действия \"$2\" произошла ошибка"
@@ -31,7 +31,7 @@ function set_command_hotkey {
 }
 
 function set_xfwm4_hotkey {
-    if xfconf-query -c xfce4-keyboard-shortcuts -p "/xfwm4/custom/$1" -t string -s "$2" &> /dev/null || xfconf-query -c xfce4-keyboard-shortcuts -n -p "/xfwm4/custom/$1" -t string -s "$2" &> /dev/null; then
+    if xfconf-query -c xfce4-keyboard-shortcuts -n -p "/xfwm4/custom/$1" -t string -s "$2" &> /dev/null; then
         report_success "Горячая клавиша \"$1\" для действия \"$2\" была успешно назначена"
     else
         report_fail "При назначении горячей клавиши \"$1\" для действия \"$2\" произошла ошибка"
@@ -39,7 +39,7 @@ function set_xfwm4_hotkey {
 }
 
 function set_xfce4-terminal_setting {
-    if xfconf-query -c xfce4-terminal -p "/$1" -t $2 -s "$3" &> /dev/null || xfconf-query -c xfce4-terminal -n -p "/$1" -t $2 -s "$3" &> /dev/null; then
+    if xfconf-query -c xfce4-terminal -n -p "/$1" -t $2 -s "$3" &> /dev/null; then
         report_success "Настройка xfce4-terminal \"$1\" была успешно задана в значение \"$3\""
     else
         report_fail "При задании значения \"$3\" настройке xfce4-terminal \"$1\" произошла ошибка"
@@ -47,7 +47,7 @@ function set_xfce4-terminal_setting {
 }
 
 function set_custom_setting {
-    if xfconf-query -c $1 -p "$2" -t $3 -s "$4" &> /dev/null || xfconf-query -c $1 -n -p "$2" -t $3 -s "$4" &> /dev/null; then
+    if xfconf-query -c $1 -n -p "$2" -t $3 -s "$4" &> /dev/null; then
         report_success "В канале \"$1\" настройка \"$2\" была успешно выставлена в значение \"$3\""
     else
         report_fail "При выставлении в канале \"$1\" настройки \"$2\" в значение \"$3\" произошла ошибка"
@@ -99,8 +99,8 @@ set_xfwm4_hotkey "<Control><Super><Shift>7" "move_window_workspace_7_key"
 set_xfwm4_hotkey "<Control><Super><Shift>8" "move_window_workspace_8_key"
 set_xfwm4_hotkey "<Control><Super><Shift>9" "move_window_workspace_9_key"
 set_command_hotkey "<Alt>F1" "xfce4-popup-whiskermenu"
-set_command_hotkey "<Alt>F2" "rofi -show run -font \"monaco 12\" -lines 20 -hide-scrollbar -scroll-method 1 -width 40 -icon-theme \"Papirus\" -show-icons"
-set_command_hotkey "<Alt>F3" "xfce4-appfinder"
+# set_command_hotkey "<Alt>F2" "rofi -show run -font \"monaco 12\" -lines 20 -hide-scrollbar -scroll-method 1 -width 40 -icon-theme \"Papirus\" -show-icons"
+set_command_hotkey "<Alt>F2" "xfce4-appfinder"
 set_command_hotkey "<Alt>Print" "xfce4-screenshooter -w"
 set_command_hotkey "<Ctrl><Alt>Delete" "xfce4-session-logout"
 set_command_hotkey "<Shift>Print" "xfce4-screenshooter -r"
@@ -130,15 +130,67 @@ set_xfce4-terminal_setting font-use-system bool false
 set_xfce4-terminal_setting misc-confirm-close bool false
 set_xfce4-terminal_setting misc-copy-on-select bool true
 set_xfce4-terminal_setting misc-cursor-blinks bool true
-set_xfce4-terminal_setting misc-default-geometry string "160x42"
+set_xfce4-terminal_setting misc-default-geometry string "150x37"
 set_xfce4-terminal_setting misc-right-click-action string "TERMINAL_RIGHT_CLICK_ACTION_PASTE_CLIPBOARD"
 set_xfce4-terminal_setting misc-show-unsafe-paste-dialog bool false
 set_xfce4-terminal_setting scrolling-on-output bool true
 set_xfce4-terminal_setting scrolling-unlimited bool true
 set_xfce4-terminal_setting shortcuts-no-menukey bool true
 set_xfce4-terminal_setting tab-activity-color string "#aa0000"
-set_xfce4-terminal_setting title-initial string "Hack them all"
+set_xfce4-terminal_setting title-initial string "NordeN"
 set_xfce4-terminal_setting title-mode string "TERMINAL_TITLE_HIDE"
 
 report_step "Задание необходимых настроек XFCE4 окружения"
 set_custom_setting xfce4-power-manager /xfce4-power-manager/dpms-on-ac-off int 0
+set_custom_setting xfwm4 /general/placement_ratio int 100
+set_custom_setting keyboard-layout /Default/XkbDisable bool false
+set_custom_setting keyboard-layout /Default/XkbLayout string "us,ru"
+set_custom_setting keyboard-layout /Default/XkbOptions/Group string "grp:alt_shift_toggle"
+set_custom_setting keyboard-layout /Default/XkbVariant string ","
+set_custom_setting thunar /default-view string "ThunarIconView"
+set_custom_setting thunar /last-details-view-column-widths string "50,50,146,134,50,50,50,50,454,50,50,388,50,482"
+set_custom_setting thunar /last-details-view-zoom-level string "THUNAR_ZOOM_LEVEL_38_PERCENT"
+set_custom_setting thunar /last-icon-view-zoom-level string "THUNAR_ZOOM_LEVEL_200_PERCENT"
+set_custom_setting thunar /last-location-bar string "ThunarLocationButtons"
+set_custom_setting thunar /last-separator-position int 245
+set_custom_setting thunar /last-show-hidden bool true
+set_custom_setting thunar /last-view string "ThunarIconView"
+set_custom_setting thunar /last-window-height int 804
+set_custom_setting thunar /last-window-maximized bool false
+set_custom_setting thunar /last-window-width int 1472
+set_custom_setting thunar /misc-date-custom-style string "%d.%m.%Y %H:%M:%S"
+set_custom_setting thunar /misc-date-style string "THUNAR_DATE_STYLE_CUSTOM"
+set_custom_setting thunar /misc-directory-specific-settings bool true
+set_custom_setting thunar /misc-full-path-in-tab-title bool true
+set_custom_setting thunar /misc-middle-click-in-tab bool true
+set_custom_setting thunar /misc-single-click bool false
+set_custom_setting thunar /misc-symbolic-icons-in-sidepane bool false
+set_custom_setting thunar /shortcuts-icon-emblems bool true
+set_custom_setting thunar /shortcuts-icon-size string "THUNAR_ICON_SIZE_24"
+set_custom_setting thunar /tree-icon-size string "THUNAR_ICON_SIZE_16"
+set_custom_setting thunar-volman /autobrowse/enabled bool false
+set_custom_setting thunar-volman /automount-drives/enabled bool false
+set_custom_setting thunar-volman /automount-media/enabled bool false
+set_custom_setting thunar-volman /autoopen/enabled bool false
+set_custom_setting xfce4-desktop /desktop-icons/file-icons/show-device-fixed bool false
+set_custom_setting xfce4-desktop /desktop-icons/file-icons/show-filesystem bool false
+set_custom_setting xfce4-desktop /desktop-icons/file-icons/show-home bool false
+set_custom_setting xfce4-desktop /desktop-icons/file-icons/show-network-removable bool false
+set_custom_setting xfce4-desktop /desktop-icons/file-icons/show-removable bool true
+set_custom_setting xfce4-desktop /desktop-icons/file-icons/show-trash bool false
+set_custom_setting xfce4-desktop /desktop-icons/file-icons/show-unknown-removable bool false
+set_custom_setting xfce4-desktop /desktop-icons/font-size double 10,000000
+set_custom_setting xfce4-desktop /desktop-icons/icon-size int 48
+set_custom_setting xfce4-desktop /desktop-icons/style int 2
+set_custom_setting xfce4-desktop /desktop-icons/tooltip-size double 64,000000
+set_custom_setting xfce4-desktop /desktop-icons/use-custom-font-size bool true
+set_custom_setting xsettings /Gtk/ButtonImages bool true
+set_custom_setting xsettings /Gtk/CursorThemeName string "breeze_cursors"
+set_custom_setting xsettings /Gtk/CursorThemeSize int 24
+set_custom_setting xsettings /Gtk/DecorationLayout string "icon,menu:minimize,maximize,close"
+set_custom_setting xsettings /Gtk/FontName string "Cantarell 11"
+set_custom_setting xsettings /Gtk/MenuImages bool true
+set_custom_setting xsettings /Gtk/MonospaceFontName string "Monaco Bold 10"
+set_custom_setting xsettings /Net/IconThemeName string "Flat-Remix-Slate-Light"
+set_custom_setting xsettings /Net/ThemeName string "Arc-Darker"
+set_custom_setting xsettings /Xfce/SyncThemes bool true
