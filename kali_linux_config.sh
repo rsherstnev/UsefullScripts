@@ -229,7 +229,6 @@ for software in \
     tigervnc-viewer \
     fastfetch \
     neomutt \
-    python3-argcomplete \
     grub-customizer \
     conky-all \
     conky-manager \
@@ -352,6 +351,7 @@ for python_tool in \
     wapiti3 \
     git-dumper \
     mitmproxy \
+    argcomplete \
     sshuttle;
 do
     if uv_install $python_tool &> /dev/null; then
@@ -607,6 +607,11 @@ if docker create --name covenant -v covenant-data:/app/Data -p 80:80 -p 443:443 
 else
     report_fail "При создании docker контейнера \"covenant\" произошла ошибка"
 fi
+if docker create --name kali kalilinux/kali-rolling:latest; then
+    report_success "Docker контейнер \"kali\" был успешно создан"
+else
+    report_fail "При создании docker контейнера \"kali\" произошла ошибка"
+fi
 
 report_step "Клонирование необходимых репозиториев с GitHub"
 # My Custom
@@ -658,12 +663,12 @@ git_clone https://github.com/b374k/b374k /opt/shells/b374k
 # Python Tools
 git_clone https://github.com/t3l3machus/hoaxshell /opt/python-software/hoaxshell
 git_clone https://github.com/t3l3machus/Villain /opt/python-software/villain
-git_clone https://github.com/offsecginger/koadic /opt/python-software/koadic
 # Tools
 git_clone https://github.com/Adaptix-Framework/AdaptixC2 /opt/software/AdaptixC2
 git_clone https://github.com/internetwache/GitTools /opt/software/gittools
 git_clone https://github.com/akhomlyuk/btconverter /opt/software/btconverter
 git_clone https://github.com/s0i37/crawl /opt/software/crawl
+git_clone https://github.com/hugsy/gef /opt/software/gef
 # Exploits
 git_clone https://github.com/cybrly/badsuccessor /opt/exploits/badsuccessor
 git_clone https://github.com/topotam/PetitPotam /opt/exploits/petitpotam
@@ -707,6 +712,13 @@ else
     report_fail "При установке PwnDbg произошла ошибка"
 fi
 
+report_step "Установка Gef"
+if echo 'source /opt/software/gef/gef.py' > /opt/software/gef/.gdbinit && echo "alias gef='gdb -x /opt/software/gef/.gdbinit'" >> $HOME/.aliases; then
+    report_success "Gef был успешно установлен"
+else
+    report_fail "При установке Gef произошла ошибка"
+fi
+
 echo "" >> $HOME/.zshrc
 echo 'source "$HOME/.cargo/env"' >> $HOME/.zshrc
 echo 'export "GOPATH=$HOME/go"' >> $HOME/.zshrc
@@ -717,4 +729,5 @@ report_step "
 - Yandex Browser (https://browser.yandex.ru/)
 - DrawIo (https://github.com/jgraph/drawio-desktop/releases)
 - Postman (https://www.postman.com/)
-- NotepadNext (https://github.com/dail8859/NotepadNext/releases)"
+- NotepadNext (https://github.com/dail8859/NotepadNext/releases)
+- OpenIDE (https://openide.ru/download/)"
