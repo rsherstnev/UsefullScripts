@@ -497,6 +497,7 @@ file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/z
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/refs/heads/master/bash_and_zsh/.aliases $HOME/.aliases
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/refs/heads/master/bash_and_zsh/.functions $HOME/.functions
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/vim/.vimrc $HOME/.vimrc
+file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/vim/init.vim $HOME/.config/nvim/init.vim
 file_download https://raw.githubusercontent.com/cocopon/iceberg.vim/master/colors/iceberg.vim $HOME/.vim/colors/iceberg.vim
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/tmux/.tmux.conf $HOME/.tmux.conf
 file_download https://raw.githubusercontent.com/dracula/midnight-commander/master/skins/dracula256.ini $HOME/.local/share/mc/skins/dracula256.ini
@@ -520,11 +521,11 @@ else
     report_fail "При установке прогарммы \"vim-plug\" для управления плагинами Vim произошла ошибка"
 fi
 
-report_step "Копирование настроек vim в neovim"
-if ln -s $HOME/.vimrc $HOME/.config/nvim/init.vim &> /dev/null; then
-    report_success "Настройки vim были успешно скопированы в neovim"
+report_step "Установка прогарммы \"vim-plug\" для управления плагинами NeoVim"
+if curl -fLo $HOME/.local/share/nvim/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim &> /dev/null; then
+    report_success "Прогармма \"vim-plug\" для управления плагинами NeoVim была установлена успешно"
 else
-    report_fail "При копировании настроек vim в neovim произошла ошибка"
+    report_fail "При установке прогарммы \"vim-plug\" для управления плагинами NeoVim произошла ошибка"
 fi
 
 report_step "Установка Docker"
@@ -625,6 +626,7 @@ git_clone https://github.com/peass-ng/PEASS-ng /opt/post/general/peass-ng
 git_clone https://github.com/61106960/adPEAS /opt/post/general/adpeas
 git_clone https://github.com/moonD4rk/HackBrowserData /opt/post/general/hack-browser-data
 git_clone https://github.com/Goodies365/YandexDecrypt /opt/post/general/yandexdecrypt
+git_clone https://github.com/hackerschoice/hackshell /opt/post/general/hackshell
 # Linux Post Recon and Exploitation
 git_clone https://github.com/rebootuser/LinEnum /opt/post/linux/linenum
 git_clone https://github.com/The-Z-Labs/linux-exploit-suggester /opt/post/linux/linux-exploit-suggester
@@ -730,4 +732,5 @@ report_step "
 - DrawIo (https://github.com/jgraph/drawio-desktop/releases)
 - Postman (https://www.postman.com/)
 - NotepadNext (https://github.com/dail8859/NotepadNext/releases)
-- OpenIDE (https://openide.ru/download/)"
+- OpenIDE (https://openide.ru/download/)
+- Detect It Easy (https://github.com/horsicq/DIE-engine/releases)"
