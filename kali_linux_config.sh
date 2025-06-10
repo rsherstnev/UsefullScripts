@@ -84,6 +84,7 @@ for directory in \
     $HOME/.config/xfce4/terminal \
     $HOME/.config/mc \
     $HOME/.config/nvim \
+    $HOME/.config/alacritty \
     $HOME/.local/share/mc/skins \
     $HOME/.local/share/xfce4/terminal/colorschemes \
     $HOME/.local/share/{themes,icons} \
@@ -162,6 +163,7 @@ for software in \
     tree \
     mc \
     rlwrap \
+    alacritty \
     tcpdump \
     tshark \
     wireshark \
@@ -319,6 +321,8 @@ for software in \
     sbd \
     rizin-cutter \
     ghidra \
+    edb-debugger \
+    jd-gui \
     gitleaks \
     trufflehog \
     nikto \
@@ -505,6 +509,8 @@ file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/m
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/mc/panels.ini $HOME/.config/mc/panels.ini
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/git/.gitconfig $HOME/.gitconfig
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/refs/heads/master/.conkyrc $HOME/.conkyrc
+file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/refs/heads/master/alacritty.toml $HOME/.config/alacritty/alacritty.toml
+
 # Установка тем
 file_download https://raw.githubusercontent.com/dracula/xfce4-terminal/master/Dracula.theme $HOME/.local/share/xfce4/terminal/colorschemes/Dracula.theme
 # Установка личных скриптов
@@ -714,11 +720,11 @@ else
     report_fail "При установке PwnDbg произошла ошибка"
 fi
 
-report_step "Установка Gef"
-if echo 'source /opt/software/gef/gef.py' > /opt/software/gef/.gdbinit && echo "alias gef='gdb -x /opt/software/gef/.gdbinit'" >> $HOME/.aliases; then
-    report_success "Gef был успешно установлен"
+report_step "Установка GEF"
+if echo 'source /opt/software/gef/gef.py' > /opt/software/gef/.gdbinit; then
+    report_success "GEF был успешно установлен"
 else
-    report_fail "При установке Gef произошла ошибка"
+    report_fail "При установке GEF произошла ошибка"
 fi
 
 echo "" >> $HOME/.zshrc
@@ -733,4 +739,5 @@ report_step "
 - Postman (https://www.postman.com/)
 - NotepadNext (https://github.com/dail8859/NotepadNext/releases)
 - OpenIDE (https://openide.ru/download/)
-- Detect It Easy (https://github.com/horsicq/DIE-engine/releases)"
+- Detect It Easy (https://github.com/horsicq/DIE-engine/releases)
+- Git Kraken Portable (https://www.gitkraken.com)"

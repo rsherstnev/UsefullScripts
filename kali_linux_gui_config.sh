@@ -137,7 +137,7 @@ set_xfce4-terminal_setting scrolling-on-output bool true
 set_xfce4-terminal_setting scrolling-unlimited bool true
 set_xfce4-terminal_setting shortcuts-no-menukey bool true
 set_xfce4-terminal_setting tab-activity-color string "#aa0000"
-set_xfce4-terminal_setting title-initial string "NordeN"
+set_xfce4-terminal_setting title-initial string "BTWOS"
 set_xfce4-terminal_setting title-mode string "TERMINAL_TITLE_HIDE"
 
 report_step "Задание необходимых настроек XFCE4 окружения"
