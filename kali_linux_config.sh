@@ -293,7 +293,6 @@ for software in \
     crunch \
     urlcrazy \
     whatweb \
-    bloodhound \
     mdbtools \
     cadaver \
     hexedit \
@@ -509,7 +508,7 @@ file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/m
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/mc/panels.ini $HOME/.config/mc/panels.ini
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/git/.gitconfig $HOME/.gitconfig
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/refs/heads/master/.conkyrc $HOME/.conkyrc
-file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/refs/heads/master/alacritty.toml $HOME/.config/alacritty/alacritty.toml
+file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/refs/heads/master/terminal/alacritty/alacritty.toml $HOME/.config/alacritty/alacritty.toml
 
 # Установка тем
 file_download https://raw.githubusercontent.com/dracula/xfce4-terminal/master/Dracula.theme $HOME/.local/share/xfce4/terminal/colorschemes/Dracula.theme
@@ -727,6 +726,13 @@ else
     report_fail "При установке GEF произошла ошибка"
 fi
 
+report_step "Установка Bloodhound"
+if apt install docker-compose-plugin &> /dev/null && wget -q https://ghst.ly/getbhce -O /opt/software/bloodhound-ce.yml && docker compose -f /opt/software/bloodhound-ce.yml up --no-start; then
+    report_success "Bloodhound был успешно установлен"
+else
+    report_fail "При установке Bloodhound произошла ошибка"
+fi
+
 echo "" >> $HOME/.zshrc
 echo 'source "$HOME/.cargo/env"' >> $HOME/.zshrc
 echo 'export "GOPATH=$HOME/go"' >> $HOME/.zshrc
@@ -740,4 +746,5 @@ report_step "
 - NotepadNext (https://github.com/dail8859/NotepadNext/releases)
 - OpenIDE (https://openide.ru/download/)
 - Detect It Easy (https://github.com/horsicq/DIE-engine/releases)
-- Git Kraken Portable (https://www.gitkraken.com)"
+- Git Kraken Portable (https://www.gitkraken.com)
+- Adalanche (https://github.com/lkarlslund/Adalanche/releases)"
