@@ -89,7 +89,8 @@ for directory in \
     $HOME/.local/share/xfce4/terminal/colorschemes \
     $HOME/.local/share/{themes,icons} \
     $HOME/.zsh-custom-completions \
-    /opt/{docker-software,docker-volumes,python-software,exploits,CTF/{htb,thm,hackerlab},post/{docker,linux,windows,general},scripts,shells,software,custom-passwords} \
+    $HOME/.python-custom-completions \
+    /opt/{docker-software,docker-volumes,python-software,exploits,ctf/{htb,thm,hackerlab},post/{docker,linux,windows,general},scripts,shells,software,custom-passwords} \
     /pictures;
 do
     if [[ ! -d $directory ]]; then
@@ -234,6 +235,13 @@ for software in \
     grub-customizer \
     conky-all \
     conky-manager \
+    gvfs \
+    gvfs-backends \
+    gvfs-common \
+    gvfs-daemons \
+    gvfs-fuse \
+    gvfs-libs \
+    thunar-volman \
     bind9-dnsutils;
 do
     if apt install -y $software &> /dev/null; then
@@ -346,6 +354,7 @@ export PATH="$PATH:/root/.local/bin/"
 report_step "Установка необходимых Python утилит с PyPI"
 for python_tool in \
     sqlmap \
+    impacket \
     pyinstaller \
     litecli \
     certipy-ad \
@@ -497,8 +506,8 @@ file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/b
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/bash/.inputrc $HOME/.inputrc
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/zsh/.zshrc $HOME/.zshrc
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/zsh/.zprofile $HOME/.zprofile
-file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/refs/heads/master/bash_and_zsh/.aliases $HOME/.aliases
-file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/refs/heads/master/bash_and_zsh/.functions $HOME/.functions
+file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/refs/heads/master/common/.aliases $HOME/.aliases
+file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/refs/heads/master/common/.functions $HOME/.functions
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/vim/.vimrc $HOME/.vimrc
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/vim/init.vim $HOME/.config/nvim/init.vim
 file_download https://raw.githubusercontent.com/cocopon/iceberg.vim/master/colors/iceberg.vim $HOME/.vim/colors/iceberg.vim
@@ -507,7 +516,7 @@ file_download https://raw.githubusercontent.com/dracula/midnight-commander/maste
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/mc/ini $HOME/.config/mc/ini
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/mc/panels.ini $HOME/.config/mc/panels.ini
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/git/.gitconfig $HOME/.gitconfig
-file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/refs/heads/master/.conkyrc $HOME/.conkyrc
+file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/refs/heads/master/conky/.conkyrc $HOME/.conkyrc
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/refs/heads/master/terminal/alacritty/alacritty.toml $HOME/.config/alacritty/alacritty.toml
 
 # Установка тем
@@ -727,7 +736,7 @@ else
 fi
 
 report_step "Установка Bloodhound"
-if apt install docker-compose-plugin &> /dev/null && wget -q https://ghst.ly/getbhce -O /opt/software/bloodhound-ce.yml && docker compose -f /opt/software/bloodhound-ce.yml up --no-start; then
+if apt install docker-compose-plugin &> /dev/null && wget -q https://ghst.ly/getbhce -O /opt/software/bloodhound-ce.yml && docker compose -f /opt/software/bloodhound-ce.yml -p bloodhound-ce up --no-start; then
     report_success "Bloodhound был успешно установлен"
 else
     report_fail "При установке Bloodhound произошла ошибка"
@@ -747,4 +756,5 @@ report_step "
 - OpenIDE (https://openide.ru/download/)
 - Detect It Easy (https://github.com/horsicq/DIE-engine/releases)
 - Git Kraken Portable (https://www.gitkraken.com)
-- Adalanche (https://github.com/lkarlslund/Adalanche/releases)"
+- Adalanche (https://github.com/lkarlslund/Adalanche/releases)
+- PingCastle (https://www.pingcastle.com/download)"
