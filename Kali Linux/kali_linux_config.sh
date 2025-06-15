@@ -110,14 +110,14 @@ else
 fi
 
 report_step "Изменение наименований стандартных директорий хомяка на кастомные"
-if sed -Ei 's/DESKTOP=.*/DESKTOP=Desktop/g' /etc/xdg/user-dirs.defaults &&
-    sed -Ei 's/DOWNLOAD=.*/DOWNLOAD=Downloads/g' /etc/xdg/user-dirs.defaults &&
-    sed -Ei 's/TEMPLATES=.*/TEMPLATES=Templates/g' /etc/xdg/user-dirs.defaults &&
-    sed -Ei 's/PUBLICSHARE=.*/PUBLICSHARE=Public/g' /etc/xdg/user-dirs.defaults &&
-    sed -Ei 's/DOCUMENTS=.*/DOCUMENTS=Documents/g' /etc/xdg/user-dirs.defaults &&
-    sed -Ei 's/MUSIC=.*/MUSIC=Music/g' /etc/xdg/user-dirs.defaults &&
-    sed -Ei 's/PICTURES=.*/PICTURES=Pictures/g' /etc/xdg/user-dirs.defaults &&
-    sed -Ei 's/VIDEOS=.*/VIDEOS=Videos/g' /etc/xdg/user-dirs.defaults &&
+if sed -Ei 's/DESKTOP=.*/DESKTOP=desktop/g' /etc/xdg/user-dirs.defaults &&
+    sed -Ei 's/DOWNLOAD=.*/DOWNLOAD=downloads/g' /etc/xdg/user-dirs.defaults &&
+    sed -Ei 's/TEMPLATES=.*/TEMPLATES=templates/g' /etc/xdg/user-dirs.defaults &&
+    sed -Ei 's/PUBLICSHARE=.*/PUBLICSHARE=public/g' /etc/xdg/user-dirs.defaults &&
+    sed -Ei 's/DOCUMENTS=.*/DOCUMENTS=documents/g' /etc/xdg/user-dirs.defaults &&
+    sed -Ei 's/MUSIC=.*/MUSIC=music/g' /etc/xdg/user-dirs.defaults &&
+    sed -Ei 's/PICTURES=.*/PICTURES=pictures/g' /etc/xdg/user-dirs.defaults &&
+    sed -Ei 's/VIDEOS=.*/VIDEOS=videos/g' /etc/xdg/user-dirs.defaults &&
     echo en_US > $HOME/.config/user-dirs.locale; then
     report_success "Наименования стандартных директорий хомяка были успешно изменены на кастомные"
 else
@@ -333,6 +333,7 @@ for software in \
     gitleaks \
     trufflehog \
     nikto \
+    peass \
     nuclei;
 do
     if apt install -y $software &> /dev/null; then
@@ -636,7 +637,6 @@ git_clone https://github.com/zsh-users/zsh-autosuggestions $HOME/.oh-my-zsh/cust
 git_clone https://github.com/Aloxaf/fzf-tab $HOME/.oh-my-zsh/custom/plugins/fzf-tab
 git_clone https://github.com/tmux-plugins/tpm $HOME/.tmux/plugins/tpm
 # General Post Recon and Exploitation
-git_clone https://github.com/peass-ng/PEASS-ng /opt/post/general/peass-ng
 git_clone https://github.com/61106960/adPEAS /opt/post/general/adpeas
 git_clone https://github.com/moonD4rk/HackBrowserData /opt/post/general/hack-browser-data
 git_clone https://github.com/Goodies365/YandexDecrypt /opt/post/general/yandexdecrypt
@@ -679,6 +679,7 @@ git_clone https://github.com/b374k/b374k /opt/shells/b374k
 # Python Tools
 git_clone https://github.com/t3l3machus/hoaxshell /opt/python-software/hoaxshell
 git_clone https://github.com/t3l3machus/Villain /opt/python-software/villain
+git_clone https://github.com/mdsecactivebreach/SharpShooter /opt/python-software/sharpshooter
 # Tools
 git_clone https://github.com/Adaptix-Framework/AdaptixC2 /opt/software/AdaptixC2
 git_clone https://github.com/internetwache/GitTools /opt/software/gittools
