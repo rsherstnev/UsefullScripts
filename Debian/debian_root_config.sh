@@ -65,9 +65,7 @@ fi
 report_step "Создание необходимых директорий"
 for directory in \
     $HOME/.vim/colors \
-    $HOME/.config/mc \
-    $HOME/.local/share/mc/skins \
-    $HOME/.config/btop;
+    $HOME/.config/mc;
 do
     if [[ ! -d $directory ]]; then
         if mkdir -p $directory &> /dev/null; then
@@ -97,21 +95,31 @@ fi
 
 report_step "Установка необходимого для работы софта"
 for software in \
+    exa \
     vim \
     wget \
     curl \
     less \
     tmux \
+    htop \
     btop \
     lnav \
     ncdu \
-    pv \
-    whowatch \
+    gnupg2 \
+    ca-certificates \
+    apt-transport-https \
+    software-properties-common \
     tree \
     tcpdump \
     mc \
-    iptables \
-    rlwrap;
+    lsof \
+    iptables;
+    # build-essential \
+    # git \
+    # syslog-ng \
+    # auditd \
+    # lynis \
+    # unattended-upgrades \
 do
     if apt install -y $software &> /dev/null; then
         report_success "Утилита \"$software\" была успешно установлена в систему"
@@ -121,14 +129,10 @@ do
 done
 
 report_step "Установка необходимых конфигов, скриптов, тем"
-config_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/bash/.bashrc $HOME/.bashrc
-config_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/refs/heads/master/bash_and_zsh/.aliases $HOME/.aliases
-config_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/refs/heads/master/bash_and_zsh/.functions $HOME/.functions
-config_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/bash/.inputrc $HOME/.inputrc
-config_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/vim/.vimrc $HOME/.vimrc
-config_download https://raw.githubusercontent.com/cocopon/iceberg.vim/master/colors/iceberg.vim $HOME/.vim/colors/iceberg.vim
-config_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/tmux/.tmux.conf $HOME/.tmux.conf
-config_download https://raw.githubusercontent.com/dracula/midnight-commander/master/skins/dracula256.ini $HOME/.local/share/mc/skins/dracula256.ini
-config_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/mc/ini $HOME/.config/mc/ini
-config_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/mc/panels.ini $HOME/.config/mc/panels.ini
-config_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/btop/btop.conf $HOME/.config/btop/btop.conf
+file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/bash/.bashrc $HOME/.bashrc
+file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/bash/.inputrc $HOME/.inputrc
+file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/refs/heads/master/common/.aliases $HOME/.aliases
+file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/refs/heads/master/common/.functions $HOME/.functions
+file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/vim/.vimrc $HOME/.vimrc
+file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/tmux/.tmux.conf $HOME/.tmux.conf
+file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/git/.gitconfig $HOME/.gitconfig
