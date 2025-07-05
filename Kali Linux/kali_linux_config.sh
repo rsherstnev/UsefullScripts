@@ -90,7 +90,7 @@ for directory in \
     $HOME/.local/share/{themes,icons} \
     $HOME/.zsh-custom-completions \
     $HOME/.python-custom-completions \
-    /opt/{docker-software,docker-volumes,python-software,exploits,ctf/{htb,thm,hackerlab},post/{docker,linux,windows,general},scripts,shells,software,custom-passwords} \
+    /opt/{docker-software,docker-volumes,docker-compose,python-software,exploits,ctf/{htb,thm,hackerlab},post/{docker,linux,windows,general},scripts,shells,software,custom-passwords} \
     /pictures;
 do
     if [[ ! -d $directory ]]; then
@@ -242,6 +242,9 @@ for software in \
     gvfs-fuse \
     gvfs-libs \
     thunar-volman \
+    obs-studio \
+    xclip \
+    gitg \
     bind9-dnsutils;
 do
     if apt install -y $software &> /dev/null; then
@@ -326,6 +329,7 @@ for software in \
     trivy \
     windows-binaries \
     sbd \
+    rizin \
     rizin-cutter \
     ghidra \
     edb-debugger \
@@ -413,6 +417,7 @@ for python_repo in \
     "Hackndo/pyGPOAbuse" \
     "casterbyte/Above" \
     "garrettfoster13/sccmhunter" \
+    "franc-pentest/ldeep" \
     "elceef/dnstwist";
 do
     if uv_github_install $python_repo &> /dev/null; then
@@ -459,6 +464,7 @@ for go_tool in \
     "Chocapikk/wpprobe" \
     "patrickhener/goshs" \
     "projectdiscovery/katana/cmd/katana" \
+    "Hackmanit/TInjA" \
     "rverton/webanalyze/cmd/webanalyze";
 do
     if go install github.com/$go_tool@latest &> /dev/null; then
@@ -480,6 +486,7 @@ source "$HOME/.cargo/env"
 
 report_step "Установка необходимых Rust утилит с crates.io"
 for rust_tool in \
+    rusthound-ce \
     atuin \
     navi \
     bandwhich \
@@ -680,15 +687,22 @@ git_clone https://github.com/b374k/b374k /opt/shells/b374k
 git_clone https://github.com/t3l3machus/hoaxshell /opt/python-software/hoaxshell
 git_clone https://github.com/t3l3machus/Villain /opt/python-software/villain
 git_clone https://github.com/mdsecactivebreach/SharpShooter /opt/python-software/sharpshooter
+git_clone https://github.com/sud0Ru/NauthNRPC /opt/python-software/nauthnrpc
 # Tools
 git_clone https://github.com/Adaptix-Framework/AdaptixC2 /opt/software/AdaptixC2
 git_clone https://github.com/internetwache/GitTools /opt/software/gittools
 git_clone https://github.com/akhomlyuk/btconverter /opt/software/btconverter
 git_clone https://github.com/s0i37/crawl /opt/software/crawl
 git_clone https://github.com/hugsy/gef /opt/software/gef
+git_clone https://github.com/urbanadventurer/username-anarchy /opt/software/username-anarchy
 # Exploits
 git_clone https://github.com/cybrly/badsuccessor /opt/exploits/badsuccessor
 git_clone https://github.com/topotam/PetitPotam /opt/exploits/petitpotam
+git_clone https://github.com/worawit/MS17-010 /opt/exploits/ms17-010
+git_clone https://github.com/risksense/zerologon /opt/exploits/zerologon
+git_clone https://github.com/p0dalirius/Coercer /opt/exploits/coercer
+git_clone https://github.com/cube0x0/CVE-2021-1675 /opt/exploits/printnightmare
+
 # Docker
 git_clone https://github.com/SabyasachiRana/WebMap /opt/docker-software/webmap
 
@@ -753,9 +767,11 @@ report_step "
 - Yandex Browser (https://browser.yandex.ru/)
 - DrawIo (https://github.com/jgraph/drawio-desktop/releases)
 - Postman (https://www.postman.com/)
+- Brubo (https://github.com/usebruno/bruno)
 - NotepadNext (https://github.com/dail8859/NotepadNext/releases)
 - OpenIDE (https://openide.ru/download/)
 - Detect It Easy (https://github.com/horsicq/DIE-engine/releases)
 - Git Kraken Portable (https://www.gitkraken.com)
 - Adalanche (https://github.com/lkarlslund/Adalanche/releases)
-- PingCastle (https://www.pingcastle.com/download)"
+- PingCastle (https://www.pingcastle.com/download)
+- Remote Desktop Manager (https://devolutions.net/remote-desktop-manager/downloadfree)"
