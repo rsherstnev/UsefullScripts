@@ -60,14 +60,6 @@ function uv_github_install {
     fi
 }
 
-function create_symlink {
-    if ln -s $1 $2 &> /dev/null; then
-        report_success "Cимлинк на \"$1\" был успешно создан в \"$2\""
-    else
-        report_fail "При создании симлинка на \"$1\" в \"$2\" произошла ошибка"
-    fi
-}
-
 touch $HOME/.hushlogin
 
 report_step "Разблокировка пользователя root, задайте ему пароль"
@@ -325,7 +317,6 @@ for software in \
     subfinder \
     swaks \
     sliver \
-    havoc \
     trivy \
     windows-binaries \
     sbd \
@@ -474,8 +465,6 @@ do
     fi
 done
 
-echo 'export PATH="$PATH:/root/go/bin"' >> /root/.zprofile
-
 report_step "Установка Rust"
 if curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y &> /dev/null; then
     report_success "Rust был успешно установлен"
@@ -526,7 +515,6 @@ file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/m
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/git/.gitconfig $HOME/.gitconfig
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/refs/heads/master/conky/.conkyrc $HOME/.conkyrc
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/refs/heads/master/terminal/alacritty/alacritty.toml $HOME/.config/alacritty/alacritty.toml
-
 # Установка тем
 file_download https://raw.githubusercontent.com/dracula/xfce4-terminal/master/Dracula.theme $HOME/.local/share/xfce4/terminal/colorschemes/Dracula.theme
 # Установка личных скриптов
@@ -554,7 +542,7 @@ report_step "Установка Docker"
 echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian bookworm stable" > /etc/apt/sources.list.d/docker.list && \
 curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg &> /dev/null && \
 apt update &> /dev/null && \
-apt install -y docker-ce docker-ce-cli containerd.io &> /dev/null
+apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin &> /dev/null
 if [[ $? == 0 ]]; then
     report_success "Docker был успешно установлен"
 else
@@ -644,6 +632,7 @@ git_clone https://github.com/zsh-users/zsh-autosuggestions $HOME/.oh-my-zsh/cust
 git_clone https://github.com/Aloxaf/fzf-tab $HOME/.oh-my-zsh/custom/plugins/fzf-tab
 git_clone https://github.com/tmux-plugins/tpm $HOME/.tmux/plugins/tpm
 # General Post Recon and Exploitation
+git_clone https://github.com/peass-ng/PEASS-ng /opt/post/general/peass-ng
 git_clone https://github.com/61106960/adPEAS /opt/post/general/adpeas
 git_clone https://github.com/moonD4rk/HackBrowserData /opt/post/general/hack-browser-data
 git_clone https://github.com/Goodies365/YandexDecrypt /opt/post/general/yandexdecrypt
@@ -690,6 +679,7 @@ git_clone https://github.com/mdsecactivebreach/SharpShooter /opt/python-software
 git_clone https://github.com/sud0Ru/NauthNRPC /opt/python-software/nauthnrpc
 # Tools
 git_clone https://github.com/Adaptix-Framework/AdaptixC2 /opt/software/AdaptixC2
+git_clone https://github.com/HavocFramework/Havoc /opt/software/Havoc
 git_clone https://github.com/internetwache/GitTools /opt/software/gittools
 git_clone https://github.com/akhomlyuk/btconverter /opt/software/btconverter
 git_clone https://github.com/s0i37/crawl /opt/software/crawl
@@ -702,9 +692,17 @@ git_clone https://github.com/worawit/MS17-010 /opt/exploits/ms17-010
 git_clone https://github.com/risksense/zerologon /opt/exploits/zerologon
 git_clone https://github.com/p0dalirius/Coercer /opt/exploits/coercer
 git_clone https://github.com/cube0x0/CVE-2021-1675 /opt/exploits/printnightmare
-
 # Docker
 git_clone https://github.com/SabyasachiRana/WebMap /opt/docker-software/webmap
+# Docker Compose
+git_clone https://github.com/its-a-feature/Mythic /opt/docker-compose/mythic
+
+report_step "Установка Bloodhound"
+if wget -q https://ghst.ly/getbhce -O /opt/docker-compose/bloodhound-ce.yml && docker compose -f /opt/docker-compose/bloodhound-ce.yml -p bloodhound-ce up --no-start; then
+    report_success "Bloodhound был успешно установлен"
+else
+    report_fail "При установке Bloodhound произошла ошибка"
+fi
 
 report_step "Генерация и скачивание необходимых файлов zsh completions"
 if gobuster completion zsh > $HOME/.zsh-custom-completions/_gobuster; then
@@ -714,10 +712,6 @@ else
 fi
 file_download https://raw.githubusercontent.com/docker/cli/master/contrib/completion/zsh/_docker $HOME/.zsh-custom-completions/_docker
 file_download https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/plugins/pip/_pip $HOME/.zsh-custom-completions/_pip
-
-report_step "Создание необходимых симлинков"
-create_symlink /opt/post/general/peass-ng/linPEAS /opt/post/linux/linPEAS
-create_symlink /opt/post/general/peass-ng/winPEAS /opt/post/windows/winPEAS
 
 report_step "Установка текстового редактора VS Code"
 wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /etc/apt/trusted.gpg.d/microsoft.gpg &> /dev/null
@@ -750,28 +744,19 @@ else
     report_fail "При установке GEF произошла ошибка"
 fi
 
-report_step "Установка Bloodhound"
-if apt install docker-compose-plugin &> /dev/null && wget -q https://ghst.ly/getbhce -O /opt/software/bloodhound-ce.yml && docker compose -f /opt/software/bloodhound-ce.yml -p bloodhound-ce up --no-start; then
-    report_success "Bloodhound был успешно установлен"
-else
-    report_fail "При установке Bloodhound произошла ошибка"
-fi
-
-echo "" >> $HOME/.zshrc
-echo 'source "$HOME/.cargo/env"' >> $HOME/.zshrc
-echo 'export "GOPATH=$HOME/go"' >> $HOME/.zshrc
-echo 'export "PATH=$PATH:$GOPATH/bin"' >> $HOME/.zshrc
+echo "" >> $HOME/.zprofile
+echo 'source "$HOME/.cargo/env"' >> $HOME/.zprofile
+echo 'export "GOPATH=$HOME/go"' >> $HOME/.zprofile
+echo 'export "PATH=$PATH:$GOPATH/bin"' >> $HOME/.zprofile
 
 report_step "
 Установить вручную:
 - Yandex Browser (https://browser.yandex.ru/)
 - DrawIo (https://github.com/jgraph/drawio-desktop/releases)
-- Postman (https://www.postman.com/)
-- Brubo (https://github.com/usebruno/bruno)
+- Bruno (https://github.com/usebruno/bruno)
 - NotepadNext (https://github.com/dail8859/NotepadNext/releases)
 - OpenIDE (https://openide.ru/download/)
 - Detect It Easy (https://github.com/horsicq/DIE-engine/releases)
-- Git Kraken Portable (https://www.gitkraken.com)
 - Adalanche (https://github.com/lkarlslund/Adalanche/releases)
 - PingCastle (https://www.pingcastle.com/download)
 - Remote Desktop Manager (https://devolutions.net/remote-desktop-manager/downloadfree)"
