@@ -73,16 +73,17 @@ report_step "Создание необходимых директорий"
 for directory in \
     $HOME/.fonts \
     $HOME/.vim/colors \
-    $HOME/.config/xfce4/terminal \
     $HOME/.config/mc \
     $HOME/.config/nvim \
     $HOME/.config/alacritty \
+    $HOME/.config/xfce4/terminal \
+    $HOME/.config/neomutt/themes \
     $HOME/.local/share/mc/skins \
     $HOME/.local/share/xfce4/terminal/colorschemes \
     $HOME/.local/share/{themes,icons} \
     $HOME/.zsh-custom-completions \
     $HOME/.python-custom-completions \
-    /opt/{docker-software,docker-volumes,docker-compose,python-software,exploits,ctf/{htb,thm,hackerlab},post/{docker,linux,windows,general},scripts,shells,software,custom-passwords} \
+    /opt/{docker-software,docker-volumes,docker-compose,python-software,exploits/{potatoes,},ctf/{htb,thm,hackerlab},post/{docker,linux,windows,general},scripts,shells,software,custom-passwords} \
     /pictures;
 do
     if [[ ! -d $directory ]]; then
@@ -169,7 +170,6 @@ for software in \
     ncdu \
     du-dust \
     pv \
-    colordiff \
     gpg \
     zulucrypt-cli \
     zulucrypt-gui \
@@ -180,7 +180,7 @@ for software in \
     bat \
     gzip \
     unrar \
-    p7zip \
+    p7zip-full \
     rsync \
     ffmpeg \
     firefox-esr \
@@ -237,6 +237,15 @@ for software in \
     obs-studio \
     xclip \
     gitg \
+    libreoffice \
+    libguestfs-tools \
+    qemu-utils \
+    dotnet-sdk-6.0 \
+    engrampa \
+    shellcheck \
+    libimage-exiftool-perl \
+    autocutsel \
+    snmp-mibs-downloader \
     bind9-dnsutils;
 do
     if apt install -y $software &> /dev/null; then
@@ -284,6 +293,7 @@ for software in \
     powersploit \
     nishang \
     seclists \
+    webshells \
     gobuster \
     hydra \
     evil-winrm \
@@ -297,6 +307,7 @@ for software in \
     urlcrazy \
     whatweb \
     mdbtools \
+    pst-utils \
     cadaver \
     hexedit \
     radare2 \
@@ -327,8 +338,11 @@ for software in \
     jd-gui \
     gitleaks \
     trufflehog \
+    davtest \
     nikto \
     peass \
+    gpp-decrypt \
+    python3-pyftpdlib \
     nuclei;
 do
     if apt install -y $software &> /dev/null; then
@@ -360,6 +374,9 @@ for python_tool in \
     git-dumper \
     mitmproxy \
     argcomplete \
+    magika \
+    ptftpd \
+    flare-floss \
     sshuttle;
 do
     if uv_install $python_tool &> /dev/null; then
@@ -373,6 +390,18 @@ if uv_install wfuzz --python 3.8 &> /dev/null; then
     report_success "Python утилита \"wfuzz\" была успешно установлена"
 else
     report_fail "При установке python утилиты \"wfuzz\" произошла ошибка"
+fi
+
+if uv_install --with chardet wesng &> /dev/null; then
+    report_success "Python утилита \"wes-ng\" была успешно установлена"
+else
+    report_fail "При установке python утилиты \"wes-ng\" произошла ошибка"
+fi
+
+if uv_install --with setuptools dirsearch &> /dev/null; then
+    report_success "Python утилита \"dirsearch\" была успешно установлена"
+else
+    report_fail "При установке python утилиты \"dirsearch\" произошла ошибка"
 fi
 
 report_step "Установка необходимых Python утилит с GitHub"
@@ -475,6 +504,7 @@ source "$HOME/.cargo/env"
 
 report_step "Установка необходимых Rust утилит с crates.io"
 for rust_tool in \
+    dog \
     rusthound-ce \
     atuin \
     navi \
@@ -517,12 +547,13 @@ file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/refs/hea
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/refs/heads/master/terminal/alacritty/alacritty.toml $HOME/.config/alacritty/alacritty.toml
 # Установка тем
 file_download https://raw.githubusercontent.com/dracula/xfce4-terminal/master/Dracula.theme $HOME/.local/share/xfce4/terminal/colorschemes/Dracula.theme
+file_download https://github.com/rsherstnev/LinuxConfigs/blob/master/terminal/xfce4-terminal/TomorrowNight.scheme $HOME/.local/share/xfce4/terminal/colorschemes/TomorrowNight.scheme
+git_clone https://github.com/dracula/mutt $HOME/.config/neomutt/themes/dracula
 # Установка личных скриптов
 file_download https://raw.githubusercontent.com/rsherstnev/CTF/master/Scripts/searchnmapscript.py /opt/scripts/searchnmapscript.py
 file_download https://raw.githubusercontent.com/rsherstnev/CTF/master/Scripts/revshellgen.py /opt/scripts/revshellgen.py
 file_download https://raw.githubusercontent.com/rsherstnev/CTF/master/Scripts/base64enpacker.py /opt/scripts/base64enpacker.py
-file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/tmux/vpn_ip.sh /opt/scripts/vpn_ip.sh
-chmod +x /opt/scripts/vpn_ip.sh
+file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/tmux/vpn_ip.sh /opt/scripts/vpn_ip.sh; chmod +x /opt/scripts/vpn_ip.sh
 
 report_step "Установка прогарммы \"vim-plug\" для управления плагинами Vim"
 if curl -fLo $HOME/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim &> /dev/null; then
@@ -651,19 +682,14 @@ git_clone https://github.com/lefayjey/linWinPwn /opt/post/windows/linwinpwn
 git_clone https://github.com/rasta-mouse/Sherlock /opt/post/windows/sherlock
 git_clone https://github.com/rasta-mouse/Watson /opt/post/windows/watson
 git_clone https://github.com/BC-SECURITY/Moriarty /opt/post/windows/moriarty
-git_clone https://github.com/GhostPack/Seatbelt /opt/post/windows/seatbelt
 git_clone https://github.com/sensepost/goLAPS/ /opt/post/windows/golaps
 git_clone https://github.com/TheManticoreProject/FindGPPPasswords /opt/post/windows/findgpppasswords
 git_clone https://github.com/AonCyberLabs/Windows-Exploit-Suggester /opt/post/windows/windows-exploit-suggester
 git_clone https://github.com/itm4n/PrivescCheck /opt/post/windows/privesccheck
-git_clone https://github.com/pentestmonkey/windows-privesc-check /opt/post/windows/windows-privesc-check
 git_clone https://github.com/411Hall/JAWS /opt/post/windows/jaws
-git_clone https://github.com/bitsadmin/wesng /opt/post/windows/wesng
 git_clone https://github.com/Flangvik/SharpCollection /opt/post/windows/sharpcollection
-git_clone https://github.com/AlessandroZ/LaZagne /opt/post/windows/lazagne
 git_clone https://github.com/Group3r/Group3r /opt/post/windows/group3r
 git_clone https://github.com/S3cur3Th1sSh1t/WinPwn /opt/post/windows/winpwn
-git_clone https://github.com/rootm0s/WinPwnage /opt/post/windows/winpwnage
 # Docker Post Recon and Exploitation
 git_clone https://github.com/stealthcopter/deepce /opt/post/docker/deepce
 # Shells
@@ -677,6 +703,7 @@ git_clone https://github.com/t3l3machus/hoaxshell /opt/python-software/hoaxshell
 git_clone https://github.com/t3l3machus/Villain /opt/python-software/villain
 git_clone https://github.com/mdsecactivebreach/SharpShooter /opt/python-software/sharpshooter
 git_clone https://github.com/sud0Ru/NauthNRPC /opt/python-software/nauthnrpc
+git_clone https://github.com/nil0x42/phpsploit /opt/python-software/phpsploit
 # Tools
 git_clone https://github.com/Adaptix-Framework/AdaptixC2 /opt/software/AdaptixC2
 git_clone https://github.com/HavocFramework/Havoc /opt/software/Havoc
@@ -685,6 +712,7 @@ git_clone https://github.com/akhomlyuk/btconverter /opt/software/btconverter
 git_clone https://github.com/s0i37/crawl /opt/software/crawl
 git_clone https://github.com/hugsy/gef /opt/software/gef
 git_clone https://github.com/urbanadventurer/username-anarchy /opt/software/username-anarchy
+git_clone https://github.com/ttpreport/ligolo-mp /opt/software/ligolo-mp
 # Exploits
 git_clone https://github.com/cybrly/badsuccessor /opt/exploits/badsuccessor
 git_clone https://github.com/topotam/PetitPotam /opt/exploits/petitpotam
@@ -692,6 +720,16 @@ git_clone https://github.com/worawit/MS17-010 /opt/exploits/ms17-010
 git_clone https://github.com/risksense/zerologon /opt/exploits/zerologon
 git_clone https://github.com/p0dalirius/Coercer /opt/exploits/coercer
 git_clone https://github.com/cube0x0/CVE-2021-1675 /opt/exploits/printnightmare
+# Exploits. Картошки
+git_clone https://github.com/Re4son/Churrasco /opt/exploits/potatoes/churrasco
+git_clone https://github.com/ohpe/juicy-potato /opt/exploits/potatoes/juicy-potato
+git_clone https://github.com/S3cur3Th1sSh1t/MultiPotato /opt/exploits/potatoes/multi-potato
+git_clone https://github.com/Kevin-Robertson/Tater /opt/exploits/potatoes/tater
+git_clone https://github.com/uknowsec/SweetPotato /opt/exploits/potatoes/sweet-potato
+git_clone https://github.com/TsukiCTF/Lovely-Potato /opt/exploits/potatoes/lovely-potato
+git_clone https://github.com/breenmachine/RottenPotatoNG /opt/exploits/potatoes/rotten-potato-ng
+git_clone https://github.com/BeichenDream/BadPotato /opt/exploits/potatoes/bad-potato
+
 # Docker
 git_clone https://github.com/SabyasachiRana/WebMap /opt/docker-software/webmap
 # Docker Compose
@@ -759,4 +797,10 @@ report_step "
 - Detect It Easy (https://github.com/horsicq/DIE-engine/releases)
 - Adalanche (https://github.com/lkarlslund/Adalanche/releases)
 - PingCastle (https://www.pingcastle.com/download)
-- Remote Desktop Manager (https://devolutions.net/remote-desktop-manager/downloadfree)"
+- Remote Desktop Manager (https://devolutions.net/remote-desktop-manager/downloadfree)
+
+Сделать веб-сайты настольным приложением через Yandex Browser:
+- Perplexity
+- ChatGPT
+- Deepseek
+- Excalidraw"
