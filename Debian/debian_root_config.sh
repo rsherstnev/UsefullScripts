@@ -38,8 +38,8 @@ function config_download {
     fi
 }
 
-read -p "Введите логин создаваемого пользователя: " _USER
-read -p "Введите GECOS создаваемого пользователя: " _GECOS
+# read -p "Введите логин создаваемого пользователя: " _USER
+# read -p "Введите GECOS создаваемого пользователя: " _GECOS
 
 report_step "Установка русского языка в систему"
 if sed '/ru_RU.UTF-8 UTF-8/s/^# //' -i /etc/locale.gen && locale-gen &> /dev/null; then
@@ -48,19 +48,19 @@ else
     report_fail "При установке русского языка в систему произошла ошибка"
 fi
 
-report_step "Создание рядового пользователя \"$_USER\""
-if useradd -c "$GECOS" -m -s /usr/bin/bash -G sudo $_USER; then
-    report_success "Рядовой пользователь \"$_USER\" был успешно создан"
-else
-    report_fail "При создании рядового пользователя \"$_USER\" произошла ошибка"
-fi
+# report_step "Создание рядового пользователя \"$_USER\""
+# if useradd -c "$GECOS" -m -s /usr/bin/bash -G sudo $_USER; then
+#     report_success "Рядовой пользователь \"$_USER\" был успешно создан"
+# else
+#     report_fail "При создании рядового пользователя \"$_USER\" произошла ошибка"
+# fi
 
-report_step "Задание пароля созданному пользователю \"$_USER\""
-if passwd $_USER; then
-    report_success "Пароль у пользователя \"$_USER\" был успешно задан"
-else
-    report_fail "При задании пароля у пользователя \"$_USER\" произошла ошибка"
-fi
+# report_step "Задание пароля созданному пользователю \"$_USER\""
+# if passwd $_USER; then
+#     report_success "Пароль у пользователя \"$_USER\" был успешно задан"
+# else
+#     report_fail "При задании пароля у пользователя \"$_USER\" произошла ошибка"
+# fi
 
 report_step "Создание необходимых директорий"
 for directory in \
@@ -95,7 +95,7 @@ fi
 
 report_step "Установка необходимого для работы софта"
 for software in \
-    exa \
+    eza \
     vim \
     wget \
     curl \
@@ -108,15 +108,14 @@ for software in \
     gnupg2 \
     ca-certificates \
     apt-transport-https \
-    software-properties-common \
     tree \
     tcpdump \
     mc \
     lsof \
+    syslog-ng \
     iptables;
     # build-essential \
     # git \
-    # syslog-ng \
     # auditd \
     # lynis \
     # unattended-upgrades \
