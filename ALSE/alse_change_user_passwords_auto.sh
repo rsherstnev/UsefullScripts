@@ -10,6 +10,7 @@
 _RED_COLOR="\e[1;31m"
 _GREEN_COLOR="\e[1;32m"
 _COLOR_RESET="\e[0m"
+
 _PASSWORD_LENGTH=10
 _ALPHABET="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$"
 # Закомментируйте алфавит выше и раскомментируйте данный для более сильных паролей
@@ -20,20 +21,51 @@ if [[ $EUID != 0 ]]; then
     exit 1
 fi
 
-function report_success {
+report_success() {
     echo -e "  ${_GREEN_COLOR}[SUCCESS] $1${_COLOR_RESET}"
 }
 
-function report_fail {
+report_fail() {
     echo -e "  ${_RED_COLOR}[FAIL] $1${_COLOR_RESET}"
 }
 
-function change_password {
+check_password_for_policy() {
+    # Аргумент №1: пароль, который необходимо проверить на соответствие парольной политики
+    # Нужно это чтобы избежать кучи ложных FAILED попыток смены пароля в логах
+    # Так как функция генерации пароля не всегда генерирует пароли, которые соответствуют принятой парольной политике
+
+    # Проверка присутствия хотя бы одного строчного символа
+    if ! [[ "$1" =~ [a-z] ]]; then
+        return 1
+    fi
+    
+    # Проверка присутствия хотя бы одного прописного символа
+    if ! [[ "$1" =~ [A-Z] ]]; then
+        return 1
+    fi
+    
+    # Проверка присутствия хотя бы одной цифры
+    if ! [[ "$1" =~ [0-9] ]]; then
+        return 1
+    fi
+    
+    # Проверка присутствия хотя бы одного специального символа
+    if ! [[ "$1" =~ [[:punct:]] ]]; then
+        return 1
+    fi
+
+    return 0
+}
+
+change_password() {
     # Аргумент №1: логин пользователя, пароль которого необходимо изменить
     user_gecos=$(grep -w $1 /etc/passwd | cut -d : -f 5 | cut -d , -f 1)
     while true
     do
         generated_password=$(< /dev/urandom tr -dc $_ALPHABET | head -c $_PASSWORD_LENGTH)
+        if ! check_password_for_policy $generated_password; then
+            continue
+        fi
         if echo $1:$generated_password | chpasswd &> /dev/null; then
             report_success "Пароль пользователя с логином \"$1\" ($user_gecos) был успешно изменен на $generated_password"
             break
