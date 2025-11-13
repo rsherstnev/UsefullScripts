@@ -134,4 +134,5 @@ config_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/refs/h
 config_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/refs/heads/master/common/.functions $HOME/.functions
 config_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/vim/.vimrc $HOME/.vimrc
 config_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/tmux/.tmux.conf $HOME/.tmux.conf
-config_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/git/.gitconfig $HOME/.gitconfig
+config_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/mc/root/ini $HOME/.config/mc/ini
+config_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/mc/root/panels.ini $HOME/.config/mc/panels.ini

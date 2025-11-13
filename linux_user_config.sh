@@ -5,11 +5,6 @@ _GREEN_COLOR="\e[1;32m"
 _YELLOW_COLOR="\e[1;33m"
 _COLOR_RESET="\e[0m"
 
-if [[ $EUID == 0 ]]; then
-    echo -e "${_RED_COLOR}!!! Данный скрипт НЕ должен быть запущен от имени root !!!${_COLOR_RESET}"
-    exit 1
-fi
-
 function report_step {
     echo -e "${_YELLOW_COLOR}[STEP] $1...${_COLOR_RESET}"
 }
@@ -40,7 +35,6 @@ function config_download {
 
 report_step "Создание необходимых директорий"
 for directory in \
-    $HOME/.vim/colors \
     $HOME/.config/mc;
 do
     if [[ ! -d $directory ]]; then
@@ -56,10 +50,16 @@ done
 
 report_step "Установка необходимых конфигов, скриптов, тем"
 config_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/bash/.bashrc $HOME/.bashrc
+config_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/refs/heads/master/bash_and_zsh/.aliases $HOME/.aliases
+config_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/refs/heads/master/bash_and_zsh/.functions $HOME/.functions
 config_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/bash/.inputrc $HOME/.inputrc
-config_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/refs/heads/master/common/.aliases $HOME/.aliases
-config_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/refs/heads/master/common/.functions $HOME/.functions
 config_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/vim/.vimrc $HOME/.vimrc
 config_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/tmux/.tmux.conf $HOME/.tmux.conf
-config_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/mc/user/ini $HOME/.config/mc/ini
-config_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/mc/user/panels.ini $HOME/.config/mc/panels.ini
+
+if [[ $EUID == 0 ]]; then
+    config_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/mc/root/ini $HOME/.config/mc/ini
+    config_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/mc/root/panels.ini $HOME/.config/mc/panels.ini
+else
+    config_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/mc/user/ini $HOME/.config/mc/ini
+    config_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/mc/user/panels.ini $HOME/.config/mc/panels.ini
+fi
