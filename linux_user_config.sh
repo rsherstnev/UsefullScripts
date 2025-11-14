@@ -5,26 +5,30 @@ _GREEN_COLOR="\e[1;32m"
 _YELLOW_COLOR="\e[1;33m"
 _COLOR_RESET="\e[0m"
 
-function report_step {
-    echo -e "${_YELLOW_COLOR}[STEP] $1...${_COLOR_RESET}"
+report_step() {
+    echo
+    echo "[STEP] $1..."
 }
 
-function report_success {
-    echo -e "  ${_GREEN_COLOR}[SUCCESS] $1.${_COLOR_RESET}"
+report_success() {
+    echo -e "${_GREEN_COLOR}[SUCCESS] $1${_COLOR_RESET}"
 }
 
-function report_fail {
-    echo -e "  ${_RED_COLOR}[FAIL] $1!${_COLOR_RESET}"
+report_warning() {
+    echo -e "${_YELLOW_COLOR}[SUCCESS] $1${_COLOR_RESET}"
 }
 
+report_fail() {
+    echo -e "${_RED_COLOR}[FAIL] $1${_COLOR_RESET}"
+}
+
+# Аргумент 1: URL скачиваемого файла
+# Аргумент 2: Путь для скачивания файла
+# Так как wget не умеет перезаписывать файлы, нужно сначала удалить файл при его наличии
 function config_download {
-    # Аргумент 1: URL скачиваемого файла
-    # Аргумент 2: Путь для скачивания файла
-    # Так как wget не умеет перезаписывать файлы, нужно сначала удалить файл при его наличии
     if [ -f $2 ]; then
         rm -f $2 &> /dev/null
     fi
-    # Скачивание файла
     file_name=$(echo $1 | awk -F '/' '{print $NF}')
     if wget $1 -O $2 &> /dev/null; then
         report_success "Файл $file_name был успешно скачан по адресу $2"
@@ -44,7 +48,7 @@ do
             report_fail "При создании директории \"$directory\" произошла ошибка"
         fi
     else
-        report_success "Директория \"$directory\" была успешно создана"
+        report_warning "Директория \"$directory\" уже существует"
     fi
 done
 
@@ -57,9 +61,10 @@ config_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master
 config_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/tmux/.tmux.conf $HOME/.tmux.conf
 
 if [[ $EUID == 0 ]]; then
-    config_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/mc/root/ini $HOME/.config/mc/ini
-    config_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/mc/root/panels.ini $HOME/.config/mc/panels.ini
+    home_dir=root
 else
-    config_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/mc/user/ini $HOME/.config/mc/ini
-    config_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/mc/user/panels.ini $HOME/.config/mc/panels.ini
+    home_dir=user
 fi
+
+config_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/mc/$home_dir/ini $HOME/.config/mc/ini
+config_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/mc/$home_dir/panels.ini $HOME/.config/mc/panels.ini
