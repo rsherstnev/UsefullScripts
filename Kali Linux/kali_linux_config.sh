@@ -282,6 +282,7 @@ for software in \
     freerdp3-shadow-x11 \
     chisel \
     proxychains4 \
+    ffuf \
     fping \
     arp-scan \
     netdiscover \
@@ -377,6 +378,7 @@ for python_tool in \
     magika \
     ptftpd \
     flare-floss \
+    'evil-winrm-py[kerberos]' \
     sshuttle;
 do
     if uv_install $python_tool &> /dev/null; then
@@ -533,8 +535,8 @@ file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/b
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/bash/.inputrc $HOME/.inputrc
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/zsh/.zshrc $HOME/.zshrc
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/zsh/.zprofile $HOME/.zprofile
-file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/refs/heads/master/common/.aliases $HOME/.aliases
-file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/refs/heads/master/common/.functions $HOME/.functions
+file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/common/.aliases $HOME/.aliases
+file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/common/.functions $HOME/.functions
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/vim/.vimrc $HOME/.vimrc
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/vim/init.vim $HOME/.config/nvim/init.vim
 file_download https://raw.githubusercontent.com/cocopon/iceberg.vim/master/colors/iceberg.vim $HOME/.vim/colors/iceberg.vim
@@ -543,8 +545,8 @@ file_download https://raw.githubusercontent.com/dracula/midnight-commander/maste
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/mc/ini $HOME/.config/mc/ini
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/mc/panels.ini $HOME/.config/mc/panels.ini
 file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/git/.gitconfig $HOME/.gitconfig
-file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/refs/heads/master/conky/.conkyrc $HOME/.conkyrc
-file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/refs/heads/master/terminal/alacritty/alacritty.toml $HOME/.config/alacritty/alacritty.toml
+file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/conky/.conkyrc $HOME/.conkyrc
+file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/terminal/alacritty/alacritty.toml $HOME/.config/alacritty/alacritty.toml
 # Установка тем
 file_download https://raw.githubusercontent.com/dracula/xfce4-terminal/master/Dracula.theme $HOME/.local/share/xfce4/terminal/colorschemes/Dracula.theme
 file_download https://github.com/rsherstnev/LinuxConfigs/blob/master/terminal/xfce4-terminal/TomorrowNight.scheme $HOME/.local/share/xfce4/terminal/colorschemes/TomorrowNight.scheme

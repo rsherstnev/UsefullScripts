@@ -146,8 +146,8 @@ env_configure() {
     report_step "Установка необходимых конфигов, скриптов, тем"
     config_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/bash/.bashrc $HOME/.bashrc
     config_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/bash/.inputrc $HOME/.inputrc
-    config_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/refs/heads/master/common/.aliases $HOME/.aliases
-    config_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/refs/heads/master/common/.functions $HOME/.functions
+    config_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/common/.aliases $HOME/.aliases
+    config_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/common/.functions $HOME/.functions
     config_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/vim/.vimrc $HOME/.vimrc
     config_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/tmux/.tmux.conf $HOME/.tmux.conf
 
