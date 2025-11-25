@@ -96,11 +96,11 @@ report_fail() {
 }
 
 get_task_state() {
-    kesl-control --get-task-state $1 | grep Состояние | awk -F ':' '{ gsub(/ /, ""); print $2 }'
+    kesl-control --get-task-state $1 2>/dev/null | grep Состояние | awk -F ':' '{ gsub(/ /, ""); print $2 }'
 }
 
 get_task_parameter_value() {
-    kesl-control --get-settings $1 $2 | awk -F '=' '{print $2}'
+    kesl-control --get-settings $1 $2 2>/dev/null | awk -F '=' '{print $2}'
 }
 
 # Проверяет наличие элемента в массиве
@@ -117,8 +117,8 @@ is_value_in_array() {
     return 1
 }
 
-if ! groups | grep -qw kesladmin; then
-    report_fail "Скрипт необходимо запускать от имени учетной записи, входящей в группу \"kesladmin\""
+if [ "$EUID" -ne 0 ] && ! groups | grep -qw kesladmin; then
+    report_fail "Скрипт необходимо запускать от имени учетной записи, входящей в группу \"kesladmin\", либо от имени суперпользователя"
     exit 1
 fi
 
@@ -195,6 +195,24 @@ if [[ $(kesl-control --get-app-settings | grep UseMDR | awk -F '=' '{print $2}')
     report_success "Значение общего параметра \"UseMDR\" программы является допустимым в сертифицированной конфигурации"
 else
     report_fail "Значение общего параметра \"UseMDR\" программы НЕ является допустимым в сертифицированной конфигурации"
+fi
+
+report_step "Проверка целостности Kaspersky Endpoint Security for Linux"
+if [ "$EUID" -ne 0 ] && ! groups | grep -qw sudo; then
+    report_fail "Для проверки целостности продуктов необходимо иметь права администратора системы, либо быть суперпользователем"
+else
+    if sudo /opt/kaspersky/kesl/bin/integrity_checker /opt/kaspersky/kesl/bin/integrity_check.xml --signature-type kds-with-filename &> /dev/null; then
+        report_success "Целостность \"Kaspersky Endpoint Security for Linux\" не нарушена"
+    else
+        report_fail "Целостность \"Kaspersky Endpoint Security for Linux\" НАРУШЕНА"
+    fi
+
+    report_step "Проверка целостности GUI Kaspersky Endpoint Security for Linux"
+    if sudo /opt/kaspersky/kesl/bin/integrity_checker /opt/kaspersky/kesl/bin/gui_integrity_check.xml --signature-type kds-with-filename &> /dev/null; then
+        report_success "Целостность \"GUI Kaspersky Endpoint Security for Linux\" не нарушена"
+    else
+        report_fail "Целостность \"GUI Kaspersky Endpoint Security for Linux\" НАРУШЕНА"
+    fi
 fi
 
 echo
