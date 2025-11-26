@@ -122,8 +122,8 @@ configure_kesl_task_parameter() {
     fi
 }
 
-if ! groups | grep -qw kesladmin; then
-    report_fail "Скрипт необходимо запускать от имени учетной записи, входящей в группу \"kesladmin\""
+if [ "$EUID" -ne 0 ] && ! groups | grep -qw kesladmin; then
+    report_fail "Скрипт необходимо запускать от имени учетной записи, входящей в группу \"kesladmin\", либо от имени суперпользователя"
     exit 1
 fi
 
