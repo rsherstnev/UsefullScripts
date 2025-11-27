@@ -2,17 +2,17 @@
 
 В данном репозитории находятся скрипты, автоматизирующие тот или иной мой рабочий процесс
 
-- [kesl_cert_check_12.2.0.2412.sh](##kesl_cert_check_12.2.0.2412.sh)
-- [kesl_cert_config_12.2.0.2412.sh](##kesl_cert_config_12.2.0.2412.sh)
-- [kesl_edit_update_source.sh](##kesl_edit_update_source.sh)
-- [debian_config.sh](##debian_config.sh)
-- [kali_linux_config.sh](##kali_linux_config.sh)
-- [kali_linux_gui_config.sh](##kali_linux_gui_config.sh)
-- [alse_change_user_passwords_auto.sh](##alse_change_user_passwords_auto.sh)
-- [alse_change_user_passwords_manual.sh](##alse_change_user_passwords_manual.sh)
-- [alse_create_users.sh](##alse_create_users.sh)
-- [Find-WhoDeletedFile.ps1](##Find-WhoDeletedFile.ps1)
-- [Get-WindowsSharesAudit.ps1](##Get-WindowsSharesAudit.ps1)
+- [kesl_cert_check_12.2.0.2412.sh](#kesl_cert_check_12.2.0.2412.sh)
+- [kesl_cert_config_12.2.0.2412.sh](#kesl_cert_config_12.2.0.2412.sh)
+- [kesl_edit_update_source.sh](#kesl_edit_update_source.sh)
+- [debian_config.sh](#debian_config.sh)
+- [kali_linux_config.sh](#kali_linux_config.sh)
+- [kali_linux_gui_config.sh](#kali_linux_gui_config.sh)
+- [alse_change_user_passwords_auto.sh](#alse_change_user_passwords_auto.sh)
+- [alse_change_user_passwords_manual.sh](#alse_change_user_passwords_manual.sh)
+- [alse_create_users.sh](#alse_create_users.sh)
+- [Find-WhoDeletedFile.ps1](#Find-WhoDeletedFile.ps1)
+- [Get-WindowsSharesAudit.ps1](#Get-WindowsSharesAudit.ps1)
 
 ## kesl_cert_check_12.2.0.2412.sh
 
@@ -189,6 +189,15 @@ sudo ./alse_create_users.sh secadmin sysadmin user{1..27}
 
 ### Примеры использования скрипта
 
+> [!WARNING]
+> Если командлет Invoke-WebRequest при скачивании файла выдает ошибку (преимущественно на Windows Server)
+> > Запрос был прерван: Не удалось создать защищенный канал SSL/TLS
+> 
+> Можно явно указать команде какую версию протокола использовать, например:
+> ```powershell
+> [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri "https://raw.githubusercontent.com/rsherstnev/UsefullScripts/master/Windows/Find-WhoDeletedFile.ps1" -OutFile Find-WhoDeletedFile.ps1
+> ```
+
 #### Предварительная загрузка скрипта в файловую систему
 
 Загрузить скрипт с GitHub в файловую систему
@@ -214,9 +223,9 @@ Invoke-Expression (New-Object System.Net.WebClient).DownloadString("https://raw.
 
 | Опция      | Функционал                                                                                                                           |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| -StartTime | Если не указать явно - будет подразумеваться "Сегодня"<br>Иначе - поиск будет производиться с указанного времени до текущего момента |
-| -FileName  | Паттерн для поиска<br>Например, если указать "txt", будут искаться все файлы, которые в своем пути содержат это слово                |
-| -GUI       | Если не указать данную опцию, вывод найденных событий будет осуществлен в консоль, иначе - в графическое окна                        |
+| StartTime | Если не указать явно - будет подразумеваться "Сегодня"<br>Иначе - поиск будет производиться с указанного времени до текущего момента |
+| FileName  | Паттерн для поиска<br>Например, если указать "txt", будут искаться все файлы, которые в своем пути содержат это слово                |
+| GUI       | Если не указать данную опцию, вывод найденных событий будет осуществлен в консоль, иначе - в графическое окна                        |
 
 ##### Примеры
 
@@ -255,6 +264,15 @@ Find-WhoDeletedFile -FileName "SampleToSearch.pdf" -StartTime "2024-01-15"
 - Проверка настроек аудита для каждой расшаренной на сервере директории
 
 ### Примеры использования скрипта
+
+> [!WARNING]
+> Если командлет Invoke-WebRequest при скачивании файла выдает ошибку (преимущественно на Windows Server)
+> > Запрос был прерван: Не удалось создать защищенный канал SSL/TLS
+> 
+> Можно явно указать команде какую версию протокола использовать, например:
+> ```powershell
+> [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri "https://raw.githubusercontent.com/rsherstnev/UsefullScripts/master/Windows/Get-WindowsSharesAudit.ps1" -OutFile Get-WindowsSharesAudit.ps1
+> ```
 
 #### Предварительная загрузка скрипта в файловую систему
 
