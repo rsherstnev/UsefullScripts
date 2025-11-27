@@ -187,5 +187,7 @@ function Get-AllSharesAuditSettings {
     }
 }
 
-Get-OSAuditSettings
-Get-AllSharesAuditSettings
+function Get-WindowsSharesAudit {
+    Get-OSAuditSettings
+    Get-AllSharesAuditSettings
+}

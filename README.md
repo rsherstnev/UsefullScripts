@@ -2,6 +2,18 @@
 
 В данном репозитории находятся скрипты, автоматизирующие тот или иной мой рабочий процесс
 
+- [kesl_cert_check_12.2.0.2412.sh](##kesl_cert_check_12.2.0.2412.sh)
+- [kesl_cert_config_12.2.0.2412.sh](##kesl_cert_config_12.2.0.2412.sh)
+- [kesl_edit_update_source.sh](##kesl_edit_update_source.sh)
+- [debian_config.sh](##debian_config.sh)
+- [kali_linux_config.sh](##kali_linux_config.sh)
+- [kali_linux_gui_config.sh](##kali_linux_gui_config.sh)
+- [alse_change_user_passwords_auto.sh](##alse_change_user_passwords_auto.sh)
+- [alse_change_user_passwords_manual.sh](##alse_change_user_passwords_manual.sh)
+- [alse_create_users.sh](##alse_create_users.sh)
+- [Find-WhoDeletedFile.ps1](##Find-WhoDeletedFile.ps1)
+- [Get-WindowsSharesAudit.ps1](##Get-WindowsSharesAudit.ps1)
+
 ## kesl_cert_check_12.2.0.2412.sh
 
 Данный скрипт позволяет провести проверку конфигурации программы "Kaspersky Endpoint Security for Linux" на соответствие сертифицирванному состоянию в соответствии с руководством по эксплуатации на данное средство антивирусной защиты.
@@ -91,7 +103,7 @@ curl -s https://raw.githubusercontent.com/rsherstnev/UsefullScripts/refs/heads/m
 
 При генерации паролей для пользователей учитываются заданные в автоматизированной системе требования к качеству паролей
 
-### Примеры использования скрипта:
+### Примеры использования скрипта
 
 Изменить пароли всем несистемным пользователям
 ```bash
@@ -117,7 +129,7 @@ sudo ./alse_change_user_passwords_auto.sh secadmin sysadmin user{1..27}
 
 Иначе скрипт изменяет пароли всех учетных записей, переданных скрипту в аргументах
 
-### Примеры использования скрипта:
+### Примеры использования скрипта
 
 Изменить пароли всем несистемным пользователям
 ```bash
@@ -149,7 +161,7 @@ sudo ./alse_change_user_passwords_manual.sh secadmin sysadmin user{1..27}
 
 При создании пользователя скрипт автоматически назначает ему максимальный уровень конфиденциальности, определенный в переменной `_USER_SECRET_DEFAULT`
 
-### Примеры использования скрипта:
+### Примеры использования скрипта
 
 Создать пользователей системы, количество которых будет считано интерактивно
 ```bash
@@ -159,4 +171,123 @@ sudo ./alse_create_users.sh
 Создать пользователей системы с логинами `secadmin`, `sysadmin` и `user1` ... `user27`
 ```bash
 sudo ./alse_create_users.sh secadmin sysadmin user{1..27}
+```
+
+## Find-WhoDeletedFile.ps1
+
+Скрипт предназначен для поиска событий удалений файлов на файловом сервере Windows (при условии, что соответствующие настройки аудита заданы)
+
+### Описание работы скрипта
+
+Сначала выполняется поиск всех событий с кодами 4663, 4659 в журнале "Безопасность"
+
+После чего фильтруются именно события удаления файлов по полю "Маска доступа"
+
+И удаляются дубликаты событий путем добавления событий в структуру данных "Хеш таблица"
+
+Дубликаты событий наблюдаются если удалять файл в расшаренной папке на самом сервере (получив доступ на него с консоли или через RDP), а не удаленно через SMB (зайдя в проводнике по UNC пути)
+
+### Примеры использования скрипта
+
+#### Предварительная загрузка скрипта в файловую систему
+
+Загрузить скрипт с GitHub в файловую систему
+```powershell
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/rsherstnev/UsefullScripts/master/Windows/Find-WhoDeletedFile.ps1" -OutFile Find-WhoDeletedFile.ps1
+```
+
+Импортировать функцию, описанную в файле, в текущую PowerShell сессию
+```powershell
+. .\Find-WhoDeletedFile.ps1
+```
+
+#### Исполнение в памяти без записи на диск
+
+Импортировать функцию, описанную в файле, в текущую PowerShell сессию
+```powershell
+Invoke-Expression (New-Object System.Net.WebClient).DownloadString("https://raw.githubusercontent.com/rsherstnev/UsefullScripts/master/Windows/Find-WhoDeletedFile.ps1")
+```
+
+#### Использование импортированной функции
+
+##### Возможные опции
+
+| Опция      | Функционал                                                                                                                           |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| -StartTime | Если не указать явно - будет подразумеваться "Сегодня"<br>Иначе - поиск будет производиться с указанного времени до текущего момента |
+| -FileName  | Паттерн для поиска<br>Например, если указать "txt", будут искаться все файлы, которые в своем пути содержат это слово                |
+| -GUI       | Если не указать данную опцию, вывод найденных событий будет осуществлен в консоль, иначе - в графическое окна                        |
+
+##### Примеры
+
+Вывести события удаления docx файлов за сегодня в консоль
+```powershell
+Find-WhoDeletedFile -FileName "docx"
+```
+
+Вывести события удаления docx файлов за сегодня в графическое окно
+```powershell
+Find-WhoDeletedFile -FileName "docx" -Gui $true
+```
+
+Вывести события удаления всех файлов в период со вчера до текущего момента в консоль
+```powershell
+Find-WhoDeletedFile -StartTime (Get-Date).AddDays(-1)
+```
+
+Вывести события удаления pdf файлов в период с 15 января 2024 года до текущего момента в консоль
+```powershell
+Find-WhoDeletedFile -FileName "pdf" -StartTime "2024-01-15"
+```
+
+Поиск событий удаления конкретного файла в период с 15 января 2024 года до текущего момента в консоль
+```powershell
+Find-WhoDeletedFile -FileName "SampleToSearch.pdf" -StartTime "2024-01-15"
+```
+
+## Get-WindowsSharesAudit.ps1
+
+Скрипт предназначен для анализа настроек аудита файловых операций на файловом сервере Windows
+
+### Описание работы скрипта
+
+- Проверка глобальных настроек аудита файловый операций в ОС
+- Проверка настроек аудита для каждой расшаренной на сервере директории
+
+### Примеры использования скрипта
+
+#### Предварительная загрузка скрипта в файловую систему
+
+Загрузить скрипт с GitHub в файловую систему
+```powershell
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/rsherstnev/UsefullScripts/master/Windows/Get-WindowsSharesAudit.ps1" -OutFile Get-WindowsSharesAudit.ps1
+```
+
+Импортировать функцию, описанную в файле, в текущую PowerShell сессию
+```powershell
+. .\Get-WindowsSharesAudit.ps1
+```
+
+#### Исполнение в памяти без записи на диск
+
+Импортировать функцию, описанную в файле, в текущую PowerShell сессию
+```powershell
+Invoke-Expression (New-Object System.Net.WebClient).DownloadString("https://raw.githubusercontent.com/rsherstnev/UsefullScripts/master/Windows/Get-WindowsSharesAudit.ps1")
+```
+
+#### Использование импортированной функции
+
+Проверка глобальных настроек аудита файловый операций в ОС
+```powershell
+Get-OSAuditSettings
+```
+
+Проверка настроек аудита для каждой расшаренной на сервере директории
+```powershell
+Get-AllSharesAuditSettings
+```
+
+Совместное выполнение функций `Get-OSAuditSettings` и `Get-AllSharesAuditSettings`
+```powershell
+Get-WindowsSharesAudit
 ```
