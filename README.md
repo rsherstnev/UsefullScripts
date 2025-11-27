@@ -2,17 +2,17 @@
 
 В данном репозитории находятся скрипты, автоматизирующие тот или иной мой рабочий процесс
 
-- [kesl_cert_check_12.2.0.2412.sh](#kesl_cert_check_12.2.0.2412.sh)
-- [kesl_cert_config_12.2.0.2412.sh](#kesl_cert_config_12.2.0.2412.sh)
-- [kesl_edit_update_source.sh](#kesl_edit_update_source.sh)
-- [debian_config.sh](#debian_config.sh)
-- [kali_linux_config.sh](#kali_linux_config.sh)
-- [kali_linux_gui_config.sh](#kali_linux_gui_config.sh)
-- [alse_change_user_passwords_auto.sh](#alse_change_user_passwords_auto.sh)
-- [alse_change_user_passwords_manual.sh](#alse_change_user_passwords_manual.sh)
-- [alse_create_users.sh](#alse_create_users.sh)
-- [Find-WhoDeletedFile.ps1](#Find-WhoDeletedFile.ps1)
-- [Get-WindowsSharesAudit.ps1](#Get-WindowsSharesAudit.ps1)
+- [kesl_cert_check_12.2.0.2412.sh](#kesl_cert_check_12202412sh)
+- [kesl_cert_config_12.2.0.2412.sh](#kesl_cert_config_12202412sh)
+- [kesl_edit_update_source.sh](#kesl_edit_update_sourcesh)
+- [debian_config.sh](#debian_configsh)
+- [kali_linux_config.sh](#kali_linux_configsh)
+- [kali_linux_gui_config.sh](#kali_linux_gui_configsh)
+- [alse_change_user_passwords_auto.sh](#alse_change_user_passwords_autosh)
+- [alse_change_user_passwords_manual.sh](#alse_change_user_passwords_manualsh)
+- [alse_create_users.sh](#alse_create_userssh)
+- [Find-WhoDeletedFile.ps1](#find-whodeletedfileps1)
+- [Get-WindowsSharesAudit.ps1](#get-windowssharesauditps1)
 
 ## kesl_cert_check_12.2.0.2412.sh
 
