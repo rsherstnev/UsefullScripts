@@ -15,7 +15,7 @@ report_success() {
 }
 
 report_warning() {
-    echo -e "${_YELLOW_COLOR}[SUCCESS] $1${_COLOR_RESET}"
+    echo -e "${_YELLOW_COLOR}[WARNING] $1${_COLOR_RESET}"
 }
 
 report_fail() {
@@ -43,7 +43,7 @@ create_sudo_user() {
     read -p "Введите логин создаваемого пользователя: " _USER
     read -p "Введите GECOS создаваемого пользователя: " _GECOS
 
-    if useradd -c "$GECOS" -m -s /usr/bin/bash -G sudo $_USER; then
+    if useradd -c "$_GECOS" -m -s /usr/bin/bash -G sudo $_USER; then
         report_success "Пользователь \"$_USER\" был успешно создан"
 
         report_step "Задание пароля созданному пользователю \"$_USER\""

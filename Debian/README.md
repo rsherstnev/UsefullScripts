@@ -6,7 +6,7 @@
 
 Запуск скрипта для настройки системы и окружения пользователя root
 ```bash
-curl -s https://raw.githubusercontent.com/rsherstnev/UsefullScripts/refs/heads/master/Debian/debian_config.sh | sudo bash
+wget https://raw.githubusercontent.com/rsherstnev/UsefullScripts/refs/heads/master/Debian/debian_config.sh && sudo bash debian_config.sh
 ```
 
 Запуск скрипта для настройки окружения обычного пользователя
