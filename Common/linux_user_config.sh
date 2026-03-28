@@ -1,31 +1,32 @@
 #!/usr/bin/env bash
 
-_RED_COLOR="\e[1;31m"
-_GREEN_COLOR="\e[1;32m"
-_YELLOW_COLOR="\e[1;33m"
-_COLOR_RESET="\e[0m"
+_GREEN_COLOR=$(printf '\033[1;32m')
+_YELLOW_COLOR=$(printf '\033[1;33m')
+_RED_COLOR=$(printf '\033[1;31m')
+_BLUE_COLOR=$(printf '\033[1;34m')
+_COLOR_RESET=$(printf '\033[0m')
 
 report_step() {
     echo
-    echo "[STEP] $1..."
+    echo "${_BLUE_COLOR}[STEP]${_COLOR_RESET} $1..."
 }
 
 report_success() {
-    echo -e "${_GREEN_COLOR}[SUCCESS] $1${_COLOR_RESET}"
+    echo "${_GREEN_COLOR}[SUCCESS]${_COLOR_RESET} $1."
 }
 
 report_warning() {
-    echo -e "${_YELLOW_COLOR}[SUCCESS] $1${_COLOR_RESET}"
+    echo "${_YELLOW_COLOR}[WARNING]${_COLOR_RESET} $1!"
 }
 
 report_fail() {
-    echo -e "${_RED_COLOR}[FAIL] $1${_COLOR_RESET}"
+    echo "${_RED_COLOR}[FAIL]${_COLOR_RESET} $1!"
 }
 
 # Аргумент 1: URL скачиваемого файла
 # Аргумент 2: Путь для скачивания файла
 # Так как wget не умеет перезаписывать файлы, нужно сначала удалить файл при его наличии
-function config_download {
+config_download() {
     if [ -f $2 ]; then
         rm -f $2 &> /dev/null
     fi

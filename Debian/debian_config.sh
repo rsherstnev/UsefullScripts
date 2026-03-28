@@ -1,25 +1,26 @@
 #!/usr/bin/env bash
 
-_RED_COLOR="\e[1;31m"
-_GREEN_COLOR="\e[1;32m"
-_YELLOW_COLOR="\e[1;33m"
-_COLOR_RESET="\e[0m"
+_GREEN_COLOR=$(printf '\033[1;32m')
+_YELLOW_COLOR=$(printf '\033[1;33m')
+_RED_COLOR=$(printf '\033[1;31m')
+_BLUE_COLOR=$(printf '\033[1;34m')
+_COLOR_RESET=$(printf '\033[0m')
 
 report_step() {
     echo
-    echo "[STEP] $1..."
+    echo "${_BLUE_COLOR}[STEP]${_COLOR_RESET} $1..."
 }
 
 report_success() {
-    echo -e "${_GREEN_COLOR}[SUCCESS] $1${_COLOR_RESET}"
+    echo "${_GREEN_COLOR}[SUCCESS]${_COLOR_RESET} $1."
 }
 
 report_warning() {
-    echo -e "${_YELLOW_COLOR}[WARNING] $1${_COLOR_RESET}"
+    echo "${_YELLOW_COLOR}[WARNING]${_COLOR_RESET} $1!"
 }
 
 report_fail() {
-    echo -e "${_RED_COLOR}[FAIL] $1${_COLOR_RESET}"
+    echo "${_RED_COLOR}[FAIL]${_COLOR_RESET} $1!"
 }
 
 # Аргумент 1: URL скачиваемого файла
@@ -59,6 +60,7 @@ create_sudo_user() {
 
 ru_language_install() {
     report_step "Установка русского языка в систему"
+
     if sed '/ru_RU.UTF-8 UTF-8/s/^# //' -i /etc/locale.gen && locale-gen &> /dev/null; then
         report_success "Русский язык был успешно установлен в систему"
     else
@@ -68,6 +70,7 @@ ru_language_install() {
 
 create_directory() {
     report_step "Создание необходимых директорий"
+
     for directory in \
         $HOME/.config/mc;
     do
@@ -85,17 +88,21 @@ create_directory() {
 
 update_system() {
     report_step "Обновление системы"
+
     export DEBIAN_FRONTEND=noninteractive
+
     if apt update &> /dev/null && apt full-upgrade -y &> /dev/null; then
         report_success "Система была успешно обновлена"
     else
         report_fail "При обновлении системы произошла ошибка"
     fi
+
     unset DEBIAN_FRONTEND
 }
 
 set_timezone() {
     report_step "Задание необходимой временной зоны"
+
     if timedatectl set-timezone Asia/Krasnoyarsk &> /dev/null; then
         report_success "Временная зона \"Красноярск\" была успешно задана"
     else
@@ -144,6 +151,7 @@ software_install() {
 
 env_configure() {
     report_step "Установка необходимых конфигов, скриптов, тем"
+    
     config_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/bash/.bashrc $HOME/.bashrc
     config_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/bash/.inputrc $HOME/.inputrc
     config_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/common/.aliases $HOME/.aliases

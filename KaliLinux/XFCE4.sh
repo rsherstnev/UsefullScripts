@@ -1,28 +1,34 @@
 #!/usr/bin/env bash
 
-_RED_COLOR="\e[1;31m"
-_GREEN_COLOR="\e[1;32m"
-_YELLOW_COLOR="\e[1;33m"
-_COLOR_RESET="\e[0m"
+_GREEN_COLOR=$(printf '\033[1;32m')
+_YELLOW_COLOR=$(printf '\033[1;33m')
+_RED_COLOR=$(printf '\033[1;31m')
+_BLUE_COLOR=$(printf '\033[1;34m')
+_COLOR_RESET=$(printf '\033[0m')
+
+report_step() {
+    echo
+    echo "${_BLUE_COLOR}[STEP]${_COLOR_RESET} $1..."
+}
+
+report_success() {
+    echo "${_GREEN_COLOR}[SUCCESS]${_COLOR_RESET} $1."
+}
+
+report_warning() {
+    echo "${_YELLOW_COLOR}[WARNING]${_COLOR_RESET} $1!"
+}
+
+report_fail() {
+    echo "${_RED_COLOR}[FAIL]${_COLOR_RESET} $1!"
+}
 
 if [[ $EUID != 0 ]]; then
-    echo -e "${_RED_COLOR}!!! Данный скрипт должен быть запущен от имени root !!!${_COLOR_RESET}"
+    report_fail "Данный скрипт должен быть запущен от имени root"
     exit 1
 fi
 
-function report_step {
-    echo -e "${_YELLOW_COLOR}[STEP] $1...${_COLOR_RESET}"
-}
-
-function report_success {
-    echo -e "  ${_GREEN_COLOR}[SUCCESS] $1.${_COLOR_RESET}"
-}
-
-function report_fail {
-    echo -e "  ${_RED_COLOR}[FAIL] $1!${_COLOR_RESET}"
-}
-
-function set_command_hotkey {
+set_command_hotkey() {
     if xfconf-query -c xfce4-keyboard-shortcuts -n -p "/commands/custom/$1" -t string -s "$2" &> /dev/null; then
         report_success "Горячая клавиша \"$1\" для действия \"$2\" была успешно назначена"
     else
@@ -30,7 +36,7 @@ function set_command_hotkey {
     fi
 }
 
-function set_xfwm4_hotkey {
+set_xfwm4_hotkey() {
     if xfconf-query -c xfce4-keyboard-shortcuts -n -p "/xfwm4/custom/$1" -t string -s "$2" &> /dev/null; then
         report_success "Горячая клавиша \"$1\" для действия \"$2\" была успешно назначена"
     else
@@ -38,7 +44,7 @@ function set_xfwm4_hotkey {
     fi
 }
 
-function set_xfce4-terminal_setting {
+set_xfce4-terminal_setting() {
     if xfconf-query -c xfce4-terminal -n -p "/$1" -t $2 -s "$3" &> /dev/null; then
         report_success "Настройка xfce4-terminal \"$1\" была успешно задана в значение \"$3\""
     else
@@ -46,7 +52,7 @@ function set_xfce4-terminal_setting {
     fi
 }
 
-function set_custom_setting {
+set_custom_setting() {
     if xfconf-query -c $1 -n -p "$2" -t $3 -s "$4" &> /dev/null; then
         report_success "В канале \"$1\" настройка \"$2\" была успешно выставлена в значение \"$3\""
     else
@@ -54,7 +60,7 @@ function set_custom_setting {
     fi
 }
 
-function set_xfce4_setting {
+set_xfce4_setting() {
     if gsettings set $1 $2 "$3" &> /dev/null; then
         report_success "Для схемы \"$1\" ключ \"$2\" со значением \"$3\" был успешно задан"
     else
