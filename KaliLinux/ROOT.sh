@@ -24,7 +24,7 @@ report_fail() {
 }
 
 if [[ $EUID != 0 ]]; then
-    report_warning "Данный скрипт должен быть запущен от имени root"
+    report_warning "Данный скрипт должен быть запущен от имени ROOT"
     exit 1
 fi
 
@@ -77,12 +77,25 @@ uv_github_install() {
     fi
 }
 
+
 touch $HOME/.hushlogin
 
-directories_creating(){
+
+directories_creating() {
     report_step "Создание необходимых директорий"
 
     for directory in \
+        $HOME/.fonts \
+        $HOME/.vim/colors \
+        $HOME/.config/mc \
+        $HOME/.config/nvim \
+        $HOME/.config/alacritty \
+        $HOME/.config/neomutt/themes \
+        $HOME/.local/share/mc/skins \
+        $HOME/.local/share/{themes,icons} \
+        $HOME/.zsh-custom-completions \
+        $HOME/.python-custom-completions \
+        $HOME/opt/{docker-software,docker-volumes,docker-compose/{bloodhound-ce,},python-software,exploits/{potatoes,},ctf/{htb,thm,hackerlab},post/{docker,linux,windows,general},scripts,shells,software,custom-passwords} \
         /pictures;
     do
         if [[ ! -d $directory ]]; then
@@ -95,7 +108,27 @@ directories_creating(){
     done
 }
 
-russian_language_installing(){
+
+home_dirs_renaming() {
+    report_step "Изменение наименований стандартных директорий хомяка на кастомные"
+
+    if sed -Ei 's/DESKTOP=.*/DESKTOP=desktop/g' $HOME/.config/user-dirs.dirs &&
+        sed -Ei 's/DOWNLOAD=.*/DOWNLOAD=downloads/g' $HOME/.config/user-dirs.dirs &&
+        sed -Ei 's/TEMPLATES=.*/TEMPLATES=templates/g' $HOME/.config/user-dirs.dirs &&
+        sed -Ei 's/PUBLICSHARE=.*/PUBLICSHARE=public/g' $HOME/.config/user-dirs.dirs &&
+        sed -Ei 's/DOCUMENTS=.*/DOCUMENTS=documents/g' $HOME/.config/user-dirs.dirs &&
+        sed -Ei 's/MUSIC=.*/MUSIC=music/g' $HOME/.config/user-dirs.dirs &&
+        sed -Ei 's/PICTURES=.*/PICTURES=pictures/g' $HOME/.config/user-dirs.dirs &&
+        sed -Ei 's/VIDEOS=.*/VIDEOS=videos/g' $HOME/.config/user-dirs.dirs &&
+        echo en_US > $HOME/.config/user-dirs.dirs; then
+        report_success "Наименования стандартных директорий хомяка были успешно изменены на кастомные"
+    else
+        report_fail "При изменении наименований стандартных директорий хомяка на кастомные произошла ошибка"
+    fi
+}
+
+
+russian_language_installing() {
     report_step "Установка русского языка в систему"
 
     if sed '/ru_RU.UTF-8 UTF-8/s/^# //' -i /etc/locale.gen && locale-gen &> /dev/null && update-locale LANG=ru_RU.UTF-8; then
@@ -105,7 +138,8 @@ russian_language_installing(){
     fi
 }
 
-system_updating(){
+
+system_updating() {
     report_step "Обновление системы"
 
     export DEBIAN_FRONTEND=noninteractive
@@ -117,7 +151,8 @@ system_updating(){
     fi
 }
 
-timezone_setting(){
+
+timezone_setting() {
     report_step "Задание необходимой временной зоны"
 
     if timedatectl set-timezone Asia/Krasnoyarsk &> /dev/null; then
@@ -127,7 +162,8 @@ timezone_setting(){
     fi
 }
 
-usual_software_installing(){
+
+usual_software_installing() {
     report_step "Установка необходимого для работы софта"
 
     software_list=(
@@ -262,9 +298,26 @@ usual_software_installing(){
     else
         report_fail "При установке утилиты VSCode произошла ошибка"
     fi
+
+    report_step "Установка прогарммы \"vim-plug\" для управления плагинами Vim"
+
+    if curl -fLo $HOME/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim &> /dev/null; then
+        report_success "Прогармма \"vim-plug\" для управления плагинами Vim была установлена успешно"
+    else
+        report_fail "При установке прогарммы \"vim-plug\" для управления плагинами Vim произошла ошибка"
+    fi
+
+    report_step "Установка прогарммы \"vim-plug\" для управления плагинами NeoVim"
+
+    if curl -fLo $HOME/.local/share/nvim/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim &> /dev/null; then
+        report_success "Прогармма \"vim-plug\" для управления плагинами NeoVim была установлена успешно"
+    else
+        report_fail "При установке прогарммы \"vim-plug\" для управления плагинами NeoVim произошла ошибка"
+    fi
 }
 
-pentest_software_installing(){
+
+pentest_software_installing() {
     report_step "Установка необходимого для тестирования на проникновение софта"
 
     software_list=(
@@ -408,7 +461,8 @@ pentest_software_installing(){
     fi
 }
 
-docker_installing(){
+
+docker_installing() {
     report_step "Установка Docker"
 
     echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian bookworm stable" > /etc/apt/sources.list.d/docker.list && \
@@ -423,7 +477,8 @@ docker_installing(){
     fi
 }
 
-user_adding_to_docker_group(){
+
+user_adding_to_docker_group() {
     report_step "Добавление обычного пользователя в группу для его работы с Docker без sudo прав"
 
     read -p "Введите логин добавляемого пользователя: " _USER
@@ -435,7 +490,201 @@ user_adding_to_docker_group(){
     fi
 }
 
-show_tips(){
+
+oh_my_zsh_installing() {
+    report_step "Установка Oh My Zsh"
+
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended &> /dev/null
+
+    if [[ $? == 0 ]]; then
+        report_success "Oh My Zsh был успешно установлен в систему"
+    else
+        report_fail "При установке Oh My Zsh в систему произошла ошибка"
+    fi
+}
+
+
+uv_installing() {
+    report_step "Установка uv"
+
+    if curl -LsSf https://astral.sh/uv/install.sh | sh &> /dev/null; then
+        report_success "UV был успешно установлен"
+    else
+        report_fail "При установке UV произошла ошибка"
+    fi
+
+    export PATH="$PATH:/root/.local/bin/"
+}
+
+
+pypi_tools_installing() {
+    report_step "Установка необходимых Python утилит с PyPI"
+
+    for python_tool in \
+        defaultcreds-cheat-sheet \
+        git-dumper \
+        argcomplete \
+        magika \
+        ptftpd \
+        flare-floss;
+    do
+        if uv_install $python_tool &> /dev/null; then
+            report_success "Python утилита \"$python_tool\" была успешно установлена"
+        else
+            report_fail "При установке python утилиты \"$python_tool\" произошла ошибка"
+        fi
+    done
+
+    if uv_install --with chardet wesng &> /dev/null; then
+        report_success "Python утилита \"wes-ng\" была успешно установлена"
+    else
+        report_fail "При установке python утилиты \"wes-ng\" произошла ошибка"
+    fi
+}
+
+
+github_python_tools_installing() {
+    report_step "Установка необходимых Python утилит с GitHub"
+
+    for python_repo in \
+        "sc0tfree/updog" \
+        "Chocapikk/pwncat-vl" \
+        "brightio/penelope" \
+        "httpie/http-prompt" \
+        "skelsec/pypykatz" \
+        "Hackndo/lsassy" \
+        "dirkjanm/BloodHound.py" \
+        "dirkjanm/adidnsdump" \
+        "blacklanternsecurity/MANSPIDER" \
+        "login-securite/DonPAPI" \
+        "PShlyundin/ldap_shell" \
+        "yaap7/ldapsearch-ad" \
+        "aniqfakhrul/powerview.py" \
+        "isd-project/isd" \
+        "cogiceo/GPOHound" \
+        "Hackndo/pyGPOAbuse" \
+        "garrettfoster13/sccmhunter" \
+        "franc-pentest/" \
+        "garrettfoster13/pre2k";
+    do
+        if uv_github_install $python_repo &> /dev/null; then
+            report_success "Python утилита из GitHub репозитория \"https://github.com/$python_repo\" была успешно установлена"
+        else
+            report_fail "При установке python утилиты из GitHub репозитория \"https://github.com/$python_repo\" произошла ошибка"
+        fi
+    done
+}
+
+
+go_tools_installing() {
+    report_step "Установка необходимых Go утилит с GitHub"
+
+    export GOPATH=$HOME/go
+    export PATH=$PATH:$GOPATH/bin
+
+    for go_tool in \
+        "FalconOpsLLC/goexec" \
+        "projectdiscovery/httpx/cmd/httpx" \
+        "jesseduffield/lazydocker" \
+        "asdf-vm/asdf/cmd/asdf" \
+        "ropnop/kerbrute" \
+        "xm1k3/cent" \
+        "Macmod/godap" \
+        "jfjallid/go-secdump" \
+        "ropnop/go-windapsearch/cmd/windapsearch" \
+        "projectdiscovery/katana/cmd/katana" \
+        "rverton/webanalyze/cmd/webanalyze";
+    do
+        if go install github.com/$go_tool@latest &> /dev/null; then
+            report_success "Go утилита \"$go_tool\" была успешно установлена"
+        else
+            report_fail "При установке go утилиты \"$go_tool\" возникли проблемы"
+        fi
+    done
+}
+
+
+rust_installing() {
+    report_step "Установка Rust"
+
+    if curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y &> /dev/null; then
+        report_success "Rust был успешно установлен"
+    else
+        report_fail "При установке Rust произошла ошибка"
+    fi
+
+    source "$HOME/.cargo/env"
+}
+
+
+rust_tools_installing() {
+    report_step "Установка необходимых Rust утилит с crates.io"
+
+    for rust_tool in \
+        rusthound-ce \
+        navi \
+        bandwhich \
+        ripgrep_all \
+        htmlq \
+        hwatch \
+        xcp \
+        rustcat \
+        rustscan;
+    do
+        if cargo install $rust_tool &> /dev/null; then
+            report_success "Rust утилита \"$rust_tool\" была успешно установлена"
+        else
+            report_fail "При установке rust утилиты \"$rust_tool\" возникли проблемы"
+        fi
+    done
+}
+
+
+config_installing() {
+    report_step "Установка необходимых конфигов, скриптов, тем"
+
+    # Установка личных конфигов
+    file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/bash/.bashrc $HOME/.bashrc
+    file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/bash/.inputrc $HOME/.inputrc
+    file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/zsh/.zshrc $HOME/.zshrc
+    file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/zsh/.zprofile $HOME/.zprofile
+    file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/refs/heads/master/common/.aliases $HOME/.aliases
+    file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/refs/heads/master/common/.functions $HOME/.functions
+    file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/vim/.vimrc $HOME/.vimrc
+    file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/vim/init.vim $HOME/.config/nvim/init.vim
+    file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/tmux/.tmux.conf $HOME/.tmux.conf
+    file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/mc/user/ini $HOME/.config/mc/ini
+    file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/mc/user/panels.ini $HOME/.config/mc/panels.ini
+    file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/git/.gitconfig $HOME/.gitconfig
+    file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/refs/heads/master/conky/.conkyrc $HOME/.conkyrc
+    file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/refs/heads/master/terminal/alacritty/alacritty.toml $HOME/.config/alacritty/alacritty.toml
+
+    # Установка тем
+    git_clone https://github.com/dracula/mutt $HOME/.config/neomutt/themes/dracula
+    file_download https://raw.githubusercontent.com/cocopon/iceberg.vim/master/colors/iceberg.vim $HOME/.vim/colors/iceberg.vim
+    file_download https://raw.githubusercontent.com/dracula/midnight-commander/master/skins/dracula256.ini $HOME/.local/share/mc/skins/dracula256.ini
+
+    # Установка личных скриптов
+    file_download https://raw.githubusercontent.com/rsherstnev/searchnmapscript/refs/heads/master/searchnmapscript.py $HOME/opt/scripts/searchnmapscript.py
+    file_download https://raw.githubusercontent.com/rsherstnev/revshellgen/refs/heads/master/revshellgen.py $HOME/opt/scripts/revshellgen.py
+    file_download https://raw.githubusercontent.com/rsherstnev/CTF/master/Scripts/base64enpacker.py $HOME/opt/scripts/base64enpacker.py
+    file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/tmux/vpn_ip.sh $HOME/opt/scripts/vpn_ip.sh; chmod +x $HOME/opt/scripts/vpn_ip.sh
+}
+
+
+github_tools_installing(){
+    report_step "Клонирование необходимых репозиториев с GitHub"
+
+    # My Custom
+    git_clone https://github.com/rsherstnev/zshcompletions $HOME/.zsh-custom-completions
+    git_clone https://github.com/zsh-users/zsh-syntax-highlighting $HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
+    git_clone https://github.com/zsh-users/zsh-autosuggestions $HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+    git_clone https://github.com/Aloxaf/fzf-tab $HOME/.oh-my-zsh/custom/plugins/fzf-tab
+    git_clone https://github.com/tmux-plugins/tpm $HOME/.tmux/plugins/tpm
+}
+
+
+show_tips() {
     report_step "
     Перезагрузите ПК перед запуском скрипта USER.sh для применения новых полномочий из группы docker
 
@@ -449,8 +698,10 @@ show_tips(){
     "
 }
 
-main(){
+
+main() {
     directories_creating
+    home_dirs_renaming
     russian_language_installing
     system_updating
     timezone_setting
@@ -458,7 +709,17 @@ main(){
     pentest_software_installing
     docker_installing
     user_adding_to_docker_group
+    oh_my_zsh_installing
+    uv_installing
+    pypi_tools_installing
+    github_python_tools_installing
+    go_tools_installing
+    rust_installing
+    rust_tools_installing
+    config_installing
+    github_tools_installing
     show_tips
 }
+
 
 main

@@ -61,9 +61,11 @@ uv_github_install() {
     fi
 }
 
+
 touch $HOME/.hushlogin
 
-directories_creating(){
+
+directories_creating() {
     report_step "Создание необходимых директорий"
 
     for directory in \
@@ -89,7 +91,8 @@ directories_creating(){
     done
 }
 
-home_dirs_renaming(){
+
+home_dirs_renaming() {
     report_step "Изменение наименований стандартных директорий хомяка на кастомные"
 
     if sed -Ei 's/DESKTOP=.*/DESKTOP=desktop/g' $HOME/.config/user-dirs.dirs &&
@@ -107,7 +110,8 @@ home_dirs_renaming(){
     fi
 }
 
-oh_my_zsh_installing(){
+
+oh_my_zsh_installing() {
     report_step "Установка Oh My Zsh"
 
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended &> /dev/null
@@ -119,7 +123,8 @@ oh_my_zsh_installing(){
     fi
 }
 
-uv_installing(){
+
+uv_installing() {
     report_step "Установка uv"
 
     if curl -LsSf https://astral.sh/uv/install.sh | sh &> /dev/null; then
@@ -131,7 +136,8 @@ uv_installing(){
     export PATH="$PATH:/root/.local/bin/"
 }
 
-pypi_tools_installing(){
+
+pypi_tools_installing() {
     report_step "Установка необходимых Python утилит с PyPI"
 
     for python_tool in \
@@ -156,7 +162,8 @@ pypi_tools_installing(){
     fi
 }
 
-github_python_tools_installing(){
+
+github_python_tools_installing() {
     report_step "Установка необходимых Python утилит с GitHub"
 
     for python_repo in \
@@ -188,7 +195,8 @@ github_python_tools_installing(){
     done
 }
 
-ruby_tools_installing(){
+
+ruby_tools_installing() {
     report_step "Установка необходимых Ruby утилит"
 
     for ruby_tool in \
@@ -202,7 +210,8 @@ ruby_tools_installing(){
     done
 }
 
-go_tools_installing(){
+
+go_tools_installing() {
     report_step "Установка необходимых Go утилит с GitHub"
 
     export GOPATH=$HOME/go
@@ -229,7 +238,8 @@ go_tools_installing(){
     done
 }
 
-rust_installing(){
+
+rust_installing() {
     report_step "Установка Rust"
 
     if curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y &> /dev/null; then
@@ -241,7 +251,8 @@ rust_installing(){
     source "$HOME/.cargo/env"
 }
 
-rust_tools_installing(){
+
+rust_tools_installing() {
     report_step "Установка необходимых Rust утилит с crates.io"
 
     for rust_tool in \
@@ -263,7 +274,8 @@ rust_tools_installing(){
     done
 }
 
-docker_tools_installing(){
+
+docker_tools_installing() {
     report_step "Скачивание необходимых docker образов"
 
     for repo in \
@@ -295,7 +307,7 @@ docker_tools_installing(){
         empire-data;
     do
         data_dir=$(docker volume inspect $volume | jq -r '.[0].Mountpoint')
-        if ln -s $data_dir $HOME/opt/docker-volumes/$volume &> /dev/null; then
+        if ln -sf $data_dir $HOME/opt/docker-volumes/$volume &> /dev/null; then
             report_success "Удобный симлинк на постоянное хранилище \"$volume\" для docker контейнеров было успешно создано"
         else
             report_fail "При создании удобного симлинка на постоянное хранилище \"$volume\" для docker контейнеров произошла ошибка"
@@ -310,7 +322,7 @@ docker_tools_installing(){
         report_fail "При создании docker контейнера \"empire\" произошла ошибка"
     fi
 
-    if docker create --name kali kalilinux/kali-rolling:latest; then
+    if docker create --name kali kalilinux/kali-rolling:latest &> /dev/null; then
         report_success "Docker контейнер \"kali\" был успешно создан"
     else
         report_fail "При создании docker контейнера \"kali\" произошла ошибка"
@@ -320,14 +332,15 @@ docker_tools_installing(){
 
     local BLOODHOUND_COMPOSE_FILE="$HOME/opt/docker-compose/bloodhound-ce/bloodhound-ce.yml"
 
-    if wget -q https://ghst.ly/getbhce -O $BLOODHOUND_COMPOSE_FILE && docker compose -f $BLOODHOUND_COMPOSE_FILE -p bloodhound-ce up --no-start; then
+    if wget -q https://ghst.ly/getbhce -O $BLOODHOUND_COMPOSE_FILE && docker compose -f $BLOODHOUND_COMPOSE_FILE -p bloodhound-ce up --no-start &> /dev/null; then
         report_success "Bloodhound был успешно установлен"
     else
         report_fail "При установке Bloodhound произошла ошибка"
     fi
 }
 
-config_installing(){
+
+config_installing() {
     report_step "Установка необходимых конфигов, скриптов, тем"
 
     # Установка личных конфигов
@@ -358,7 +371,8 @@ config_installing(){
     file_download https://raw.githubusercontent.com/rsherstnev/LinuxConfigs/master/tmux/vpn_ip.sh $HOME/opt/scripts/vpn_ip.sh; chmod +x $HOME/opt/scripts/vpn_ip.sh
 }
 
-software_installing(){
+
+software_installing() {
     report_step "Установка прогарммы \"vim-plug\" для управления плагинами Vim"
 
     if curl -fLo $HOME/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim &> /dev/null; then
@@ -376,7 +390,8 @@ software_installing(){
     fi
 }
 
-github_tools_installing(){
+
+github_tools_installing() {
     report_step "Клонирование необходимых репозиториев с GitHub"
 
     # My Custom
@@ -461,7 +476,8 @@ github_tools_installing(){
     git_clone https://github.com/its-a-feature/Mythic $HOME/opt/docker-compose/mythic
 }
 
-zshcompletions_configuring(){
+
+zshcompletions_configuring() {
     report_step "Генерация и скачивание необходимых файлов zsh completions"
 
     file_download https://raw.githubusercontent.com/docker/cli/master/contrib/completion/zsh/_docker $HOME/.zsh-custom-completions/_docker
@@ -475,14 +491,16 @@ zshcompletions_configuring(){
     fi
 }
 
-post_configure(){
+
+post_configure() {
     echo "" >> $HOME/.zprofile
     echo 'source "$HOME/.cargo/env"' >> $HOME/.zprofile
     echo 'export "GOPATH=$HOME/go"' >> $HOME/.zprofile
     echo 'export "PATH=$PATH:$GOPATH/bin"' >> $HOME/.zprofile
 }
 
-main(){
+
+main() {
     directories_creating
     home_dirs_renaming
     oh_my_zsh_installing
@@ -500,5 +518,6 @@ main(){
     zshcompletions_configuring
     post_configure
 }
+
 
 main
