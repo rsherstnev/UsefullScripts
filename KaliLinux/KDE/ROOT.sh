@@ -276,6 +276,8 @@ usual_software_installing() {
         lft
         whois
         bind9-dnsutils
+        grc
+        libfuse2t64
     )
 
     tools_install "${software_list[@]}"
@@ -374,6 +376,7 @@ pentest_software_installing() {
         impacket-scripts
         smtp-user-enum
         exploitdb
+        exploitdb-papers
         metasploit-framework
         responder
         bettercap
