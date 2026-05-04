@@ -105,7 +105,7 @@ home_dirs_renaming() {
         sed -Ei 's/MUSIC=.*/MUSIC=music/g' $HOME/.config/user-dirs.dirs &&
         sed -Ei 's/PICTURES=.*/PICTURES=pictures/g' $HOME/.config/user-dirs.dirs &&
         sed -Ei 's/VIDEOS=.*/VIDEOS=videos/g' $HOME/.config/user-dirs.dirs &&
-        echo en_US > $HOME/.config/user-dirs.dirs; then
+        echo en_US > $HOME/.config/user-dirs.locale; then
         report_success "Наименования стандартных директорий хомяка были успешно изменены на кастомные"
     else
         report_fail "При изменении наименований стандартных директорий хомяка на кастомные произошла ошибка"

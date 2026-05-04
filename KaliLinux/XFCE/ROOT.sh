@@ -123,8 +123,8 @@ home_dirs_renaming() {
         sed -Ei 's/DOCUMENTS=.*/DOCUMENTS=documents/g' /etc/xdg/user-dirs.defaults &&
         sed -Ei 's/MUSIC=.*/MUSIC=music/g' /etc/xdg/user-dirs.defaults &&
         sed -Ei 's/PICTURES=.*/PICTURES=pictures/g' /etc/xdg/user-dirs.defaults &&
-        sed -Ei 's/VIDEOS=.*/VIDEOS=videos/g' /etc/xdg/user-dirs.defaults &&
-        echo en_US > /etc/xdg/user-dirs.defaults; then
+        sed -Ei 's/VIDEOS=.*/VIDEOS=videos/g' /etc/xdg/user-dirs.defaults;
+    then
         report_success "Наименования стандартных директорий хомяка были успешно изменены на кастомные"
     else
         report_fail "При изменении наименований стандартных директорий хомяка на кастомные произошла ошибка"
@@ -220,7 +220,6 @@ usual_software_installing() {
         filezilla
         viewnior
         flameshot
-        cherrytree
         keepassxc-full
         traceroute
         remmina
@@ -458,6 +457,7 @@ pentest_software_installing() {
         bloodhound-ce-python
         nuclei
         httpx-toolkit
+        obsidian
     )
 
     tools_install "${software_list[@]}"
