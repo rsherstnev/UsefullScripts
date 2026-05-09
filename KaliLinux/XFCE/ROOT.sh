@@ -95,8 +95,7 @@ directories_creating() {
         $HOME/.local/share/{themes,icons} \
         $HOME/.zsh-custom-completions \
         $HOME/.python-custom-completions \
-        $HOME/opt/{docker-software,docker-volumes,docker-compose/{bloodhound-ce,},python-software,exploits/{potatoes,},ctf/{htb,thm,hackerlab},post/{docker,linux,windows,general},scripts,shells,software,custom-passwords} \
-        /pictures \
+        $HOME/opt/{docker-software,docker-volumes,docker-compose,python-software,exploits/{potatoes,},ctf/{htb,thm,hackerlab},post/{docker,linux,windows,general},scripts,shells,software,custom-passwords} \
         /opt/docker-volumes \
         /opt/docker-compose/{bloodhound-ce,};
     do
@@ -457,6 +456,7 @@ pentest_software_installing() {
         bloodhound-ce-python
         nuclei
         httpx-toolkit
+        dirbuster
         obsidian
     )
 
@@ -583,11 +583,7 @@ pypi_tools_installing() {
     report_step "Установка необходимых Python утилит с PyPI"
 
     for python_tool in \
-        defaultcreds-cheat-sheet \
-        git-dumper \
-        magika \
-        ptftpd \
-        flare-floss;
+        ptftpd;
     do
         if uv_install $python_tool &> /dev/null; then
             report_success "Python утилита \"$python_tool\" была успешно установлена"
@@ -740,18 +736,24 @@ github_tools_installing(){
 }
 
 
+post_configure() {
+    echo "" >> $HOME/.zprofile
+    echo 'source "$HOME/.cargo/env"' >> $HOME/.zprofile
+    echo 'export "GOPATH=$HOME/go"' >> $HOME/.zprofile
+    echo 'export "PATH=$PATH:$GOPATH/bin"' >> $HOME/.zprofile
+}
+
+
 show_tips() {
     report_step "
-    Перезагрузите ПК перед запуском скрипта USER.sh для применения новых полномочий из группы docker
-
-    Установить вручную:
-    - DrawIo (https://github.com/jgraph/drawio-desktop/releases)
-    - Bruno (https://github.com/usebruno/bruno)
-    - NotepadNext (https://github.com/dail8859/NotepadNext/releases)
-    - OpenIDE (https://openide.ru/download/)
-    - Adalanche (https://github.com/lkarlslund/Adalanche/releases)
-    - PingCastle (https://www.pingcastle.com/download)
-    "
+Установить вручную:
+- DrawIo (https://github.com/jgraph/drawio-desktop/releases)
+- Bruno (https://github.com/usebruno/bruno)
+- NotepadNext (https://github.com/dail8859/NotepadNext/releases)
+- Adalanche (https://github.com/lkarlslund/Adalanche/releases)
+- PingCastle (https://www.pingcastle.com/download)
+- AdaptixC2
+"
 }
 
 
@@ -776,6 +778,7 @@ main() {
     rust_tools_installing
     config_installing
     github_tools_installing
+    post_configure
     show_tips
 
     unset DEBIAN_FRONTEND

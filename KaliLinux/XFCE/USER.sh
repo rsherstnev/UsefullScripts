@@ -79,7 +79,7 @@ directories_creating() {
         $HOME/.local/share/{themes,icons} \
         $HOME/.zsh-custom-completions \
         $HOME/.python-custom-completions \
-        $HOME/opt/{docker-software,docker-volumes,docker-compose/{bloodhound-ce,},python-software,exploits/{potatoes,},ctf/{htb,thm,hackerlab},post/{docker,linux,windows,general},scripts,shells,software,custom-passwords};
+        $HOME/opt/{docker-software,docker-volumes,docker-compose,python-software,exploits/{potatoes,},ctf/{htb,thm,hackerlab},post/{docker,linux,windows,general},scripts,shells,software,custom-passwords};
     do
         if [[ ! -d $directory ]]; then
             if mkdir -p $directory &> /dev/null; then
